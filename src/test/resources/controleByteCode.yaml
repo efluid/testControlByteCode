@@ -1,0 +1,9 @@
+# Liste des jars inclus dans le controle
+jarsInclus :
+  - junit-4
+
+# Liste des classes qui ne seront pas testees
+filtreClassesExclues :
+
+# Liste des erreurs non recuperees
+filtreErreursExclues :

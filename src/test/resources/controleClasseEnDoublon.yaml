@@ -1,0 +1,6 @@
+# Liste des classes qui ne seront pas testees
+filtreErreursExclues :
+- javax.
+- module-info
+
+

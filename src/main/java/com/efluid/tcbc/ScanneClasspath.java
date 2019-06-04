@@ -1,21 +1,16 @@
 package com.efluid.tcbc;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.jar.*;
+
+import org.junit.*;
+import org.slf4j.*;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Canevas permettant de parcourir le classpath classe par classe <br>
@@ -114,7 +109,7 @@ public abstract class ScanneClasspath {
    * Aucune erreur ne doit être remontée
    */
   protected void isValid(int erreurs) {
-    Assert.assertEquals(erreurs, 0);
+    assertThat(0).isEqualTo(erreurs);
   }
 
   protected void terminate() {

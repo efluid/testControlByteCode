@@ -4,7 +4,4 @@ import com.efluid.tcbc.TestControleByteCode;
 
 public class TestExampleControlByteCode extends TestControleByteCode {
 
-  public TestExampleControlByteCode() {
-    super();
-  }
 }

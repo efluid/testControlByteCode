@@ -9,7 +9,7 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
 
   private static final String FICHIER_CONFIGURATION = "controleClasseEnDoublon.yaml";
   private Map<String, Classe> classesParcourues = new HashMap<>();
-  private Map<String, Set<Classe>> classesEnDoublon = new HashMap<>();
+  protected Map<String, Set<Classe>> classesEnDoublon = new HashMap<>();
 
   @Override
   protected String getFichierConfiguration() {

@@ -1,18 +1,15 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.utils.MethodLookup;
-import org.cojen.classfile.*;
-import org.cojen.classfile.constant.ConstantMethodInfo;
-import org.cojen.classfile.constant.ConstantNameAndTypeInfo;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
+
+import org.cojen.classfile.*;
+import org.cojen.classfile.constant.*;
+import org.slf4j.*;
+
+import com.efluid.tcbc.utils.MethodLookup;
 
 /**
  * Classe de test JUNIT permettant de contrôler le byteCode des classes JAVA du classpath de la JVM en cours. <br>
@@ -312,7 +309,7 @@ public class TestControleByteCode extends ScanneClasspath {
    * Possibilité de configuré le nombre de jar minimum traité via la variable d'environnement -DnbJarMinimum=2
    */
   protected void validerNombreJarMinimumTraite() {
-    Assert.assertTrue(jarsTraites.size() > nbJarMinimum);
+    assertThat(jarsTraites.size() > nbJarMinimum).isTrue();
   }
 
   @Override

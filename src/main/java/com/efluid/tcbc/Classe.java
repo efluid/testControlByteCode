@@ -1,12 +1,16 @@
 package com.efluid.tcbc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import org.slf4j.*;
 
 /**
  * Représente une classe lors de la lecture du byteCode
  */
 public class Classe {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Classe.class);
+
   private Jar jar;
   private String nom;
   private int nbErreurs;
@@ -48,8 +52,8 @@ public class Classe {
     return jar;
   }
 
-  public void afficherJar() {
-    ScanneClasspath.doLog("\t- " + getJar().getNom());
+  public String getNomJar() {
+    return getJar().getNom();
   }
 
   @Override

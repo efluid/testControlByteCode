@@ -2,10 +2,14 @@ package com.efluid.tcbc;
 
 import java.util.*;
 
+import org.slf4j.*;
+
 /**
  * Contrôle qu'il n'y ait pas de classe en doublon dans le classpath
  */
 public class TestControleClasseEnDoublon extends ScanneClasspath {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestControleClasseEnDoublon.class);
 
   private static final String FICHIER_CONFIGURATION = "controleClasseEnDoublon.yaml";
   private Map<String, Classe> classesParcourues = new HashMap<>();
@@ -44,14 +48,14 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
   @Override
   protected int logBilan() {
     super.logBilan();
-    doLog("Classes en doublon : ");
+    LOG.info("|=== Classes en doublon ===|");
     classesEnDoublon.forEach((nom, classes) -> {
-      doLog(" - " + nom + " : ");
-      classes.forEach(Classe::afficherJar);
+      LOG.info("[" + nom + "]");
+      classes.forEach(classe -> LOG.info("\t" + classe.getNomJar()));
     });
-    doLog("Nombre de classes trouvees : " + classesParcourues.size());
-    doLog("Nombre de classes en doublon : " + classesEnDoublon.size());
-    doLog("Nombre de classes en doublon exclues : " + exclusions.get(Exclusion.ERREUR).size());
+    LOG.info("Classes trouvees : " + classesParcourues.size());
+    LOG.info("Classes en doublon : " + classesEnDoublon.size());
+    LOG.info("Classes en doublon exclues : " + exclusions.get(Exclusion.ERREUR).size());
     return classesEnDoublon.size();
   }
 }

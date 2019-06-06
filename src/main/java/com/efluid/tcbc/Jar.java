@@ -46,4 +46,8 @@ public class Jar implements Comparable<Jar> {
   public int compareTo(Jar o) {
     return nom.compareTo(o.getNom());
   }
+
+  public boolean isEnErreur() {
+    return !classesEnErreur.isEmpty();
+  }
 }

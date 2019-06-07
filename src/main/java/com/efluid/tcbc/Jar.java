@@ -1,7 +1,6 @@
 package com.efluid.tcbc;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Représente un Jar qui est contrôlé. Contient la liste des erreurs remontées lors de la lecture du byteCode.
@@ -9,23 +8,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Jar implements Comparable<Jar> {
 
   private String nom = "";
-  private List<Classe> classesEnErreur = new ArrayList<>();
-  private Map<String, AtomicLong> dependances = new HashMap<>();
+  private Set<Classe> classesEnErreur = new HashSet<>();
 
   public Jar(String nom) {
     this.nom = nom;
   }
 
-  public List<Classe> getClassesEnErreur() {
+  public Set<Classe> getClassesEnErreur() {
     return classesEnErreur;
-  }
-
-  public void addDependance(String dependance) {
-    dependances.putIfAbsent(dependance, new AtomicLong(0)).incrementAndGet();
-  }
-
-  public Map<String, AtomicLong> getDependances() {
-    return Collections.unmodifiableMap(dependances);
   }
 
   public Classe addToClassesEnErreur(Classe classe) {
@@ -47,7 +37,7 @@ public class Jar implements Comparable<Jar> {
     return nom.compareTo(o.getNom());
   }
 
-  public boolean isEnErreur() {
+  public boolean isErreur() {
     return !classesEnErreur.isEmpty();
   }
 }

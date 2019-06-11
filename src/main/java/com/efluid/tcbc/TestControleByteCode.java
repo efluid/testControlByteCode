@@ -1,18 +1,16 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.utils.MethodLookup;
-import org.cojen.classfile.*;
-import org.cojen.classfile.constant.ConstantMethodInfo;
-import org.cojen.classfile.constant.ConstantNameAndTypeInfo;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.System.lineSeparator;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
+
+import org.cojen.classfile.*;
+import org.cojen.classfile.constant.*;
+import org.slf4j.*;
+
+import com.efluid.tcbc.utils.MethodLookup;
 
 /**
  * Classe de test JUNIT permettant de contrôler le byteCode des classes JAVA du classpath de la JVM en cours. <br>
@@ -237,9 +235,6 @@ public class TestControleByteCode extends ScanneClasspath {
 
   /**
    * Sert uniquement pour l'affichage dans le log
-   *
-   * @param parameterTypes
-   * @return
    */
   public static String getStringParameterTypes(Class<?>[] parameterTypes) {
     StringJoiner retour = new StringJoiner(",", "[", "]");
@@ -276,28 +271,28 @@ public class TestControleByteCode extends ScanneClasspath {
     for (Jar jar : jarsTraites) {
       nbErreurParJar = 0;
       if (!jar.getClassesEnErreur().isEmpty()) {
-        doLog(System.lineSeparator() + "=== Jar traite : " + jar.getNom() + " ===");
-        doLog("Classes en erreur :");
+        LOG.info("|=== " + jar.getNom() + " ===|");
+        LOG.info("\t|=== Classes en erreur ===|");
       }
       for (Classe classeEnErreur : jar.getClassesEnErreur()) {
         nbErreurTotal += classeEnErreur.getNbErreurs();
         nbErreurParJar += classeEnErreur.getNbErreurs();
         nbClassesEnErreur++;
 
-        doLog(" - " + classeEnErreur.getNom() + " : " + classeEnErreur.getNbErreurs() + " erreur(s)");
+        LOG.info("\t\t" + classeEnErreur.getNom() + " : " + classeEnErreur.getNbErreurs() + " erreur(s)");
       }
-      erreursParJar.append(" - " + jar.getNom() + " : " + nbErreurParJar).append(System.lineSeparator());
+      erreursParJar.append("\t" + jar.getNom() + " : " + nbErreurParJar).append(lineSeparator());
       if (nbErreurParJar > 0) {
         nbJarEnErreur++;
       }
     }
 
-    doLogList(classesReferenceesNonTrouveesOuChargees, System.lineSeparator() + "Classes referencees non trouvees :");
-    doLog(System.lineSeparator() + "Nombre de classes non trouvees ou non chargees (erreur de chargement) : " + classesReferenceesNonTrouveesOuChargees.size());
-    doLog("Nombre d'erreur par jar : " + System.lineSeparator() + erreursParJar.toString());
-    doLog("Nombre de jar en erreur : " + nbJarEnErreur);
-    doLog("Nombre de classe en erreur : " + nbClassesEnErreur);
-    doLog("Nombre d'erreur totale : " + nbErreurTotal);
+    doLogList(classesReferenceesNonTrouveesOuChargees, "Classes referencees non trouvees :");
+    LOG.info("Classes non trouvees ou non chargees (erreur de chargement) : " + classesReferenceesNonTrouveesOuChargees.size());
+    LOG.info("Erreur par jar : " + lineSeparator() + erreursParJar.toString());
+    LOG.info("Jar en erreur : " + nbJarEnErreur);
+    LOG.info("Classe en erreur : " + nbClassesEnErreur);
+    LOG.info("Nombre d'erreur totale : " + nbErreurTotal);
 
     return nbErreurTotal;
   }
@@ -309,10 +304,10 @@ public class TestControleByteCode extends ScanneClasspath {
   }
 
   /**
-   * Possibilité de configuré le nombre de jar minimum traité via la variable d'environnement -DnbJarMinimum=2
+   * Possibilité de configurer le nombre de jar minimum traité via la variable d'environnement -DnbJarMinimum=2
    */
   protected void validerNombreJarMinimumTraite() {
-    Assert.assertTrue(jarsTraites.size() > nbJarMinimum);
+    assertThat(jarsTraites.size() > nbJarMinimum).isTrue();
   }
 
   @Override

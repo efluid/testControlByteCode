@@ -1,21 +1,17 @@
 package com.efluid.tcbc;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import static com.efluid.tcbc.ScanneClasspath.Exclusion.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.jar.*;
+
+import org.junit.*;
+import org.slf4j.*;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Canevas permettant de parcourir le classpath classe par classe <br>
@@ -32,7 +28,8 @@ public abstract class ScanneClasspath {
   private String classpath = System.getProperty(ENV_CLASSEPATH);
 
   public enum Exclusion {
-    CLASSE, ERREUR
+    CLASSE,
+    ERREUR
   }
 
   /**
@@ -57,8 +54,8 @@ public abstract class ScanneClasspath {
   protected Map<Exclusion, Set<String>> exclusions = new HashMap<Exclusion, Set<String>>();
 
   public ScanneClasspath() {
-    exclusions.put(Exclusion.ERREUR, new HashSet<String>());
-    exclusions.put(Exclusion.CLASSE, new HashSet<String>());
+    exclusions.put(ERREUR, new HashSet<String>());
+    exclusions.put(CLASSE, new HashSet<String>());
   }
 
   protected void addToExclusions(Exclusion typeExclusion, String exclusion) {
@@ -86,8 +83,8 @@ public abstract class ScanneClasspath {
   }
 
   private void logExclusion() {
-    doLogList(exclusions.get(Exclusion.CLASSE), System.lineSeparator() + "Exclusions des classes suivantes :");
-    doLogList(exclusions.get(Exclusion.ERREUR), System.lineSeparator() + "Exclusions des erreurs suivantes :");
+    doLogList(exclusions.get(CLASSE), "Exclusions des classes");
+    doLogList(exclusions.get(ERREUR), "Exclusions des erreurs");
   }
 
   @Before
@@ -97,7 +94,7 @@ public abstract class ScanneClasspath {
 
   @Test
   public void execute() {
-    execute(classpath != null ? new String[]{classpath} : ((String[]) null));
+    execute(classpath != null ? new String[] { classpath } : ((String[]) null));
   }
 
   /**
@@ -114,7 +111,7 @@ public abstract class ScanneClasspath {
    * Aucune erreur ne doit être remontée
    */
   protected void isValid(int erreurs) {
-    Assert.assertEquals(erreurs, 0);
+    assertThat(0).isEqualTo(erreurs);
   }
 
   protected void terminate() {
@@ -128,7 +125,7 @@ public abstract class ScanneClasspath {
     try {
       InputStream is = TestControleByteCode.class.getClassLoader().getResourceAsStream(getFichierConfiguration());
       if (is == null) {
-        doLog("Fichier de configuration inexistant : " + getFichierConfiguration());
+        LOG.error("Fichier de configuration inexistant : " + getFichierConfiguration());
         return;
       }
       Map<String, ArrayList<String>> configuration = (Map<String, ArrayList<String>>) new Yaml().load(is);
@@ -138,12 +135,12 @@ public abstract class ScanneClasspath {
         chargerListeConfiguration(configuration, filtreErreursExclues, "filtreErreursExclues");
       }
     } catch (Throwable ex) {
-      doLog("Erreur lors de la récupération du fichier de configuration " + getFichierConfiguration());
+      LOG.error("Erreur lors de la récupération du fichier de configuration " + getFichierConfiguration());
       LOG.error("", ex);
     }
-    doLog("Liste des jars inclus : " + jarsInclus);
-    doLog("Liste d'exclusion des classes a ne pas traiter : " + filtreClassesExclues);
-    doLog("Liste des erreurs a ne pas traiter: " + filtreErreursExclues);
+    LOG.info("Jars inclus : " + jarsInclus);
+    LOG.info("Exclusion des classes a ne pas traiter : " + filtreClassesExclues);
+    LOG.info("Erreurs a ne pas traiter: " + filtreErreursExclues);
   }
 
   /**
@@ -202,7 +199,7 @@ public abstract class ScanneClasspath {
         String nomClasseEnCours = classe.toString().substring(chemin.length() + 1);
         nomClasseEnCours = removeEnd(nomClasseEnCours.replaceAll(File.separator.equals("/") ? File.separator : "\\\\", "."), ".class");
         classeEnCours = new Classe(jarEnCours, nomClasseEnCours);
-        if (isExclu(Exclusion.CLASSE, classeEnCours.getNom())) {
+        if (isExclu(CLASSE, classeEnCours.getNom())) {
           continue;
         }
 
@@ -220,6 +217,7 @@ public abstract class ScanneClasspath {
   public List<Path> getFichiersClass(String repertoireClasses) throws IOException {
     final List<Path> fichiersClass = new ArrayList<>();
     Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<Path>() {
+
       @Override
       public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
         if (file.getFileName().toString().endsWith(".class")) {
@@ -236,7 +234,7 @@ public abstract class ScanneClasspath {
    * Parcours toutes les classes du jar en cours
    */
   private void controlerJar() {
-    doLog("Controle JAR : " + jarEnCours);
+    LOG.info("Controle JAR : " + jarEnCours);
     try (JarFile jar = new JarFile(jarEnCours.getNom())) {
       Enumeration<JarEntry> enumeration = jar.entries();
       JarEntry jarEntry = null;
@@ -246,7 +244,7 @@ public abstract class ScanneClasspath {
         // Récupération du nom de chaque fichier
         if (jarEntry.getName().endsWith(".class")) {
           classeEnCours = new Classe(jarEnCours, removeEnd(jarEntry.getName().replaceAll("/", "."), ".class"));
-          if (isExclu(Exclusion.CLASSE, classeEnCours.getNom())) {
+          if (isExclu(CLASSE, classeEnCours.getNom())) {
             continue;
           }
           fluxEnCours = isAvecFlux() ? jar.getInputStream(jarEntry) : null;
@@ -269,7 +267,7 @@ public abstract class ScanneClasspath {
    * Indique si l'erreur ou la classe est exclue
    */
   protected boolean isExclu(Exclusion typeExclusion, final String str) {
-    for (String exclusion : (Exclusion.CLASSE.equals(typeExclusion) ? filtreClassesExclues : filtreErreursExclues)) {
+    for (String exclusion : (CLASSE.equals(typeExclusion) ? filtreClassesExclues : filtreErreursExclues)) {
       if (str.toLowerCase().indexOf(exclusion.toLowerCase()) != -1) {
         addToExclusions(typeExclusion, str);
         return true;
@@ -278,20 +276,11 @@ public abstract class ScanneClasspath {
     return false;
   }
 
-  protected static void doLog(String msg) {
-    System.out.println(msg);
-    LOG.info(msg);
-  }
-
-  protected static void doLogList(Collection<String> coll, String msgEntete) {
-    if (coll != null && !coll.isEmpty()) {
-      List<String> liste = (List<String>) ((coll instanceof List) ? coll : new ArrayList<String>(coll));
-      Collections.sort(liste);
-      doLog(msgEntete);
-      for (String s : liste) {
-        doLog(" - " + s);
-      }
-      doLog(System.lineSeparator());
+  protected static void doLogList(Collection<String> col, String msgEntete) {
+    if (col != null && !col.isEmpty()) {
+      List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<String>(col));
+      LOG.info("|==== "+ msgEntete + " ====|");
+      liste.stream().sorted().forEach(s -> LOG.info("\t" + s));
     }
   }
 

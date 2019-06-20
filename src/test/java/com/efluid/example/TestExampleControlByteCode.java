@@ -25,8 +25,9 @@ public class TestExampleControlByteCode extends TestControleByteCode {
 
   @Override
   protected void isValid(int erreurs) {
-    assertThat(erreurs).isEqualTo(1);
-    Classe classInError = jarsTraites.stream().filter(Jar::isEnErreur).flatMap(jar -> jar.getClassesEnErreur().stream()).findFirst().get();
+    int nombreErreurs = getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum();
+    assertThat(nombreErreurs).isEqualTo(1);
+    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur).flatMap(jar -> jar.getClassesEnErreur().stream()).findFirst().get();
     assertThat(classInError.getNom()).contains(NAME_CLASS_CREATED_BY_BYTE_BUDDY);
   }
 

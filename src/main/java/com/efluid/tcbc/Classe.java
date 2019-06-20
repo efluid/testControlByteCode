@@ -13,8 +13,6 @@ public class Classe {
 
   private Jar jar;
   private String nom;
-  private int nbErreurs;
-
   List<String> erreurs = new ArrayList<String>();
 
   public Classe(Jar jar, String nom) {
@@ -23,7 +21,6 @@ public class Classe {
   }
 
   public void addErreur(String erreur) {
-    nbErreurs++;
     erreurs.add(erreur);
   }
 
@@ -41,7 +38,7 @@ public class Classe {
   }
 
   public int getNbErreurs() {
-    return nbErreurs;
+    return erreurs.size();
   }
 
   public String getNom() {
@@ -59,5 +56,9 @@ public class Classe {
   @Override
   public String toString() {
     return "Classe " + getNom() + " contenue par la jar " + jar.getNom();
+  }
+
+  public List<String> getErreurs() {
+    return erreurs;
   }
 }

@@ -27,8 +27,8 @@
   </organization>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -51,13 +51,6 @@
       <version>1.7.25</version>
     </dependency>
 
-    <!-- To support JDK 8 Cojen need https://github.com/cojen/Cojen/commit/e27e6cdd0d536c3d21dac51df0dd5168e6ca1e30 but it actually not release -->
-    <dependency>
-      <groupId>org.cojen</groupId>
-      <artifactId>cojen</artifactId>
-      <version>2.2.6-SNAPSHOT</version>
-    </dependency>
-
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
@@ -74,6 +67,12 @@
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
       <version>1.9.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.24.0-GA</version>
     </dependency>
 
   </dependencies>

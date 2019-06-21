@@ -28,7 +28,7 @@ public class BilanControleByteCode {
     LOG.info("Classes en erreur lors du chargement : " + controle.getClassesReferenceesNonTrouveesOuChargees().size());
     controle.getClassesReferenceesNonTrouveesOuChargees().values().forEach(classe -> LOG.info("\t" + classe));
     LOG.info("Jars en erreur : " + controle.getJarsTraites().stream().filter(Jar::isErreur).count());
-    LOG.info("=== Synthèse classes en erreur (" + controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).count() + ") ===");
+    LOG.info("=== Synthèse classes en erreur (" + controle.getJarsTraites().stream().mapToLong(jar -> jar.getClassesEnErreur().size()).sum() + ") ===");
     controle.getJarsTraites().stream().filter(Jar::isErreur).forEach(jar -> LOG.info("\t" + jar.getNom() + " : " + jar.getClassesEnErreur().size() + lineSeparator()));
     LOG.info("Nombre d'erreurs totales : " + controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum());
   }

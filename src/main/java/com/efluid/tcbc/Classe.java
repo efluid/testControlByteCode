@@ -13,7 +13,7 @@ public class Classe {
 
   private Jar jar;
   private String nom;
-  List<String> erreurs = new ArrayList<String>();
+  List<String> erreurs = new ArrayList<>();
 
   public Classe(Jar jar, String nom) {
     this.jar = jar;

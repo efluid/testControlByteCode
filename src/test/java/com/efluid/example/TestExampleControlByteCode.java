@@ -3,6 +3,7 @@ package com.efluid.example;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.*;
+import java.util.function.Function;
 
 import com.efluid.tcbc.*;
 import net.bytebuddy.ByteBuddy;
@@ -27,7 +28,7 @@ public class TestExampleControlByteCode extends TestControleByteCode {
   protected void isValid(int erreurs) {
     int nombreErreurs = getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum();
     assertThat(nombreErreurs).isEqualTo(1);
-    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur).flatMap(jar -> jar.getClassesEnErreur().stream()).findFirst().get();
+    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur).flatMap(jar -> jar.getClassesEnErreur().stream()).findFirst().orElseThrow();
     assertThat(classInError.getNom()).contains(NAME_CLASS_CREATED_BY_BYTE_BUDDY);
   }
 
@@ -50,6 +51,9 @@ public class TestExampleControlByteCode extends TestControleByteCode {
     return true;
   }
 
+  /**
+   * Utilisé par {@link TestExampleControlByteCode}
+   */
   public String test() {
     return "ok";
   }

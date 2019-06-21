@@ -7,9 +7,12 @@ import java.util.Map;
  * Utilitaire de manipulation des types primitifs.
  * <p>
  * Ces types sont : {@code boolean}, {@code byte}, {@code char}, {@code double}, {@code float}, {@code int}, {@code long}, {@code short}
- * <p>
+ * <p>dcv
  * Classe de support pour les opérations de boxing/unboxing, nécessaires à la réflection.
+ *
+ * @deprecated Use {@link jdk.dynalink.linker.support.TypeUtilities}
  */
+@Deprecated
 public final class PrimitiveTypeUtils {
 
   static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER = new HashMap<>();
@@ -125,9 +128,7 @@ public final class PrimitiveTypeUtils {
         return true;
       }
     } else if (fromThisClass.isPrimitive()) {
-      if (theClass.equals(getWrapper(fromThisClass))) {
-        return true;
-      }
+      return theClass.equals(getWrapper(fromThisClass));
     }
 
     return false;

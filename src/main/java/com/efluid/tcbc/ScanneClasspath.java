@@ -42,20 +42,20 @@ public abstract class ScanneClasspath {
   /**
    * Filtre indiquant les jars contrôlés
    */
-  protected List<String> jarsInclus = new ArrayList<String>();
-  private List<String> filtreClassesExclues = new ArrayList<String>();
-  private List<String> filtreErreursExclues = new ArrayList<String>();
+  protected List<String> jarsInclus = new ArrayList<>();
+  private List<String> filtreClassesExclues = new ArrayList<>();
+  private List<String> filtreErreursExclues = new ArrayList<>();
 
   /**
    * Utilisés pour effectuer le bilan global
    */
-  protected Set<Jar> jarsTraites = new HashSet<Jar>();
+  protected Set<Jar> jarsTraites = new HashSet<>();
 
-  protected Map<Exclusion, Set<String>> exclusions = new HashMap<Exclusion, Set<String>>();
+  protected Map<Exclusion, Set<String>> exclusions = new HashMap<>();
 
   public ScanneClasspath() {
-    exclusions.put(ERREUR, new HashSet<String>());
-    exclusions.put(CLASSE, new HashSet<String>());
+    exclusions.put(ERREUR, new HashSet<>());
+    exclusions.put(CLASSE, new HashSet<>());
   }
 
   protected void addToExclusions(Exclusion typeExclusion, String exclusion) {
@@ -94,7 +94,7 @@ public abstract class ScanneClasspath {
 
   @Test
   public void execute() {
-    execute(classpath != null ? new String[] { classpath } : ((String[]) null));
+    execute(classpath != null ? new String[] { classpath } : null);
   }
 
   /**
@@ -128,7 +128,7 @@ public abstract class ScanneClasspath {
         LOG.error("Fichier de configuration inexistant : " + getFichierConfiguration());
         return;
       }
-      Map<String, ArrayList<String>> configuration = (Map<String, ArrayList<String>>) new Yaml().load(is);
+      Map<String, ArrayList<String>> configuration = new Yaml().load(is);
       if (configuration != null) {
         chargerListeConfiguration(configuration, jarsInclus, "jarsInclus");
         chargerListeConfiguration(configuration, filtreClassesExclues, "filtreClassesExclues");
@@ -216,7 +216,7 @@ public abstract class ScanneClasspath {
    */
   public List<Path> getFichiersClass(String repertoireClasses) throws IOException {
     final List<Path> fichiersClass = new ArrayList<>();
-    Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<Path>() {
+    Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<>() {
 
       @Override
       public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
@@ -237,7 +237,7 @@ public abstract class ScanneClasspath {
     LOG.info("Controle JAR : " + jarEnCours);
     try (JarFile jar = new JarFile(jarEnCours.getNom())) {
       Enumeration<JarEntry> enumeration = jar.entries();
-      JarEntry jarEntry = null;
+      JarEntry jarEntry;
       // Boucle sur tous les fichiers contenus dans le JAR
       while (enumeration.hasMoreElements()) {
         jarEntry = enumeration.nextElement();
@@ -268,7 +268,7 @@ public abstract class ScanneClasspath {
    */
   protected boolean isExclu(Exclusion typeExclusion, final String str) {
     for (String exclusion : (CLASSE.equals(typeExclusion) ? filtreClassesExclues : filtreErreursExclues)) {
-      if (str.toLowerCase().indexOf(exclusion.toLowerCase()) != -1) {
+      if (str.toLowerCase().contains(exclusion.toLowerCase())) {
         addToExclusions(typeExclusion, str);
         return true;
       }
@@ -278,7 +278,7 @@ public abstract class ScanneClasspath {
 
   protected static void doLogList(Collection<String> col, String msgEntete) {
     if (col != null && !col.isEmpty()) {
-      List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<String>(col));
+      List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<>(col));
       LOG.info("|==== "+ msgEntete + " ====|");
       liste.stream().sorted().forEach(s -> LOG.info("\t" + s));
     }

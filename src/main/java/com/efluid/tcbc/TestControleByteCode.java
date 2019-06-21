@@ -1,15 +1,23 @@
 package com.efluid.tcbc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.efluid.tcbc.utils.MethodLookup;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtPrimitiveType;
+import javassist.NotFoundException;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Descriptor;
+import jdk.dynalink.linker.support.TypeUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import org.cojen.classfile.*;
-import org.cojen.classfile.constant.*;
-import org.slf4j.*;
-
-import com.efluid.tcbc.utils.MethodLookup;
+import static javassist.bytecode.ConstPool.*;
+import static javassist.bytecode.Descriptor.getReturnType;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Classe de test JUNIT permettant de contrôler le byteCode des classes JAVA du classpath de la JVM en cours. <br>
@@ -43,18 +51,18 @@ public class TestControleByteCode extends ScanneClasspath {
   /* Utilisés pour effectuer le bilan global du contrôle du byteCode */
   private Map<String, String> classesReferenceesNonTrouveesOuChargees = new HashMap<>();
 
+  private ClassPool classPool;
+
   public TestControleByteCode() {
     super();
-  }
-
-  @Override
-  public void init() {
-    super.init();
+    classPool = ClassPool.getDefault();
   }
 
   @Override
   protected void traitementClasseEnCours() {
-    chargerByteCodeClasse();
+    if (toClass(classeEnCours.getNom()) != null) {
+      chargerByteCodeClasse();
+    }
   }
 
   /**
@@ -62,40 +70,36 @@ public class TestControleByteCode extends ScanneClasspath {
    */
   private void chargerByteCodeClasse() {
     try {
-      Class<?> classe = chargerClasseDansClassLoader(classeEnCours.getNom());
-      ClassFile classfile = ClassFile.readFrom(fluxEnCours);
-
-      if (classe != null) {
-        lireByteCodeClasse(classfile.getConstantPool());
-      }
+      lireByteCodeClasse(classPool.get(classeEnCours.getNom()).getClassFile().getConstPool());
     } catch (Throwable ex) {
-      addErreur("Classe en erreur de lecture du byte code : " + classeEnCours);
-      LOG.error("Classe en erreur de lecture du byte code : {}", classeEnCours, ex);
+      addErreur("Classe en erreur de lecture du byte code : " + classeEnCours + " Erreur : " + ex.getMessage());
     }
   }
 
   /**
    * Parcours le byteCode de la classe en cours de lecture
    */
-  protected void lireByteCodeClasse(ConstantPool constantPool) {
+  private void lireByteCodeClasse(ConstPool constantPool) throws NotFoundException {
     scannerMethodes(constantPool);
   }
 
   /**
    * Parcours les méthodes référencées par la classe en cours
    */
-  protected void scannerMethodes(ConstantPool constantPool) {
-    for (Object obj : constantPool.getAllConstants()) {
-      if (obj instanceof ConstantMethodInfo) {
-        ConstantMethodInfo constantMethod = (ConstantMethodInfo) obj;
-        ConstantNameAndTypeInfo constantNameAndTypeInfo = constantMethod.getNameAndType();
-        String nomMethode = constantNameAndTypeInfo.getName();
-        if (!"<init>".equals(nomMethode) && !"<clinit>".equals(nomMethode)) {
-          Descriptor descriptor = constantNameAndTypeInfo.getType();
-          if (descriptor instanceof MethodDesc) {
-            analyserMethode(constantMethod, nomMethode, (MethodDesc) descriptor);
-          }
-        }
+  private void scannerMethodes(ConstPool constantPool) throws NotFoundException {
+    for (int index = 1; index < constantPool.getSize(); index++) {
+      switch (constantPool.getTag(index)) {
+        case (CONST_Methodref):
+          analyserMethode(constantPool.getMethodrefClassName(index), constantPool.getMethodrefName(index), constantPool.getMethodrefType(index));
+          break;
+        case (CONST_InterfaceMethodref):
+          analyserMethode(constantPool.getInterfaceMethodrefClassName(index), constantPool.getInterfaceMethodrefName(index), constantPool.getInterfaceMethodrefType(index));
+          break;
+        case (CONST_InvokeDynamic):
+          String signature = constantPool.getInvokeDynamicType(index);
+          toClass(getReturnType(signature, classPool));
+          getClassParametresTypes(signature, classPool);
+          break;
       }
     }
   }
@@ -103,15 +107,39 @@ public class TestControleByteCode extends ScanneClasspath {
   /**
    * Charge la classe référencée et appelle la méthode
    */
-  private void analyserMethode(ConstantMethodInfo constantMethod, String nomMethode, MethodDesc methodDesc) {
-    Class<?> aClass = chargerClasse(constantMethod.getParentClass().getType().getRootName(), nomMethode);
-    if (aClass != null) {
-      appelMethod(aClass, nomMethode, getParametres(methodDesc), methodDesc.getReturnType());
+  private void analyserMethode(String nomClasse, String nomMethode, String signature) throws NotFoundException {
+    if (!List.of("<init>", "<clinit>").contains(nomMethode)) {
+      Class<?> aClass = chargerClasse(nomClasse, nomMethode);
+      if (aClass != null) {
+        appelerMethode(aClass, nomMethode, getClassParametresTypes(signature, classPool), toClass(getReturnType(signature, classPool)));
+      }
     }
   }
 
-  public Class<?> chargerClasseDansClassLoader(String nomClasse) {
-    return chargerClasse(nomClasse, "");
+  private Class<?>[] getClassParametresTypes(String signature, ClassPool classPool) throws NotFoundException {
+    return Arrays.stream(Descriptor.getParameterTypes(signature, classPool)).map(this::toClass).toArray(Class[]::new);
+  }
+
+  private Class<?> toClass(CtClass ctClasse) {
+    if (ctClasse.isPrimitive()) {
+      return TypeUtilities.getPrimitiveType(toClass(((CtPrimitiveType) ctClasse).getWrapperName()));
+    } else if (ctClasse.isArray()) {
+      try {
+        return Array.newInstance(toClass(ctClasse.getComponentType()), 0).getClass();
+      } catch (NotFoundException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return toClass(ctClasse.getName());
+  }
+
+  private Class<?> toClass(String nomClasse) {
+    try {
+      return chargerClasse(nomClasse, "");
+    } catch (Throwable ex) {
+      addErreur("Classe en erreur de chargement : " + classeEnCours + "" + ex.getMessage());
+      return null;
+    }
   }
 
   /**
@@ -121,14 +149,12 @@ public class TestControleByteCode extends ScanneClasspath {
     String libelle = nomClasse + (nomMethode != null ? "#" + nomMethode : "");
     try {
       return Class.forName(nomClasse);
-    } catch (java.lang.NoClassDefFoundError errClassDefFound) {
-      libelle += " - " + errClassDefFound;
     } catch (VerifyError ex) {
       String message = ex.getMessage();
       message = message.substring(ex.getMessage().indexOf("Exception Details:"), ex.getMessage().indexOf("Current Frame:")).replace('\n', ' ');
-      libelle += " - " + (ex.getMessage().indexOf("Exception Details:") != -1 ? message : ex.getMessage());
-    } catch (Throwable ex) {
-      libelle += " - " + ex;
+      libelle += " - " + (ex.getMessage().contains("Exception Details:") ? message : ex.getMessage());
+    } catch (Throwable errClassDefFound) {
+      libelle += " - " + errClassDefFound;
     }
 
     boolean erreurAjoutee = addErreur(libelle);
@@ -139,21 +165,9 @@ public class TestControleByteCode extends ScanneClasspath {
   }
 
   /**
-   * Obtenir les paramètres de la méthode (signature)
-   */
-  private static Class<?>[] getParametres(MethodDesc methodDesc) {
-    Class<?>[] parametres = new Class[methodDesc.getParameterCount()];
-    int i = 0;
-    for (TypeDesc typeDesc : methodDesc.getParameterTypes()) {
-      parametres[i++] = typeDesc.toClass();
-    }
-    return parametres;
-  }
-
-  /**
    * Test l'appel de la méthode
    */
-  void appelMethod(Class<?> aClass, String methodName, Class<?>[] parameterTypes, TypeDesc typeDeRetour) {
+  private void appelerMethode(Class<?> aClass, String methodName, Class<?>[] parameterTypes, Class typeDeRetour) {
     try {
       Method method = MethodLookup.findMethodInHierarchy(aClass, methodName, parameterTypes);
       if (method == null) {
@@ -170,7 +184,7 @@ public class TestControleByteCode extends ScanneClasspath {
     } catch (NoClassDefFoundError errNoClassDefFound) {
       addErreur("Classe non trouvee lors de la récuperation de la méthode " + classeEnCours + "#" + methodName + " : " + errNoClassDefFound);
     } catch (Throwable ex) {
-      LOG.error("Erreur d'appel de methode", ex);
+      addErreur("Erreur d'appel de methode : " + ex);
     }
   }
 
@@ -178,35 +192,28 @@ public class TestControleByteCode extends ScanneClasspath {
    * Test d'accès "polymorphique" : le MethodHandle.invoke ne peut être retrouvé par réflexion.
    * <p>
    * On se base sur le marqueur interne du compilo.
+   * MethodHandle.PolymorphicSugnature est une annotation interne à la classe, non publique.
    */
-  private static boolean isPolymorphicSignature(Class<?> aClass, String methodName) {
+  private boolean isPolymorphicSignature(Class<?> aClass, String methodName) {
     try {
       Method method = aClass.getMethod(methodName, Object[].class);
-      if (null == method) {
-        return false;
-      }
-      // MethodHandle.PolymorphicSugnature est une annotation interne à la classe, non publique.
-      return Arrays.asList(method.getAnnotations()).stream()
-        .map(Object::toString)
-        .anyMatch("@java.lang.invoke.MethodHandle$PolymorphicSignature()"::equals);
-
+      return method != null && Arrays.stream(method.getAnnotations()).map(Object::toString).anyMatch("@java.lang.invoke.MethodHandle$PolymorphicSignature()"::equals);
     } catch (Throwable ex) {
-      LOG.debug("Methode (polymorphique) non trouvee", ex);
+      addErreur("Methode (polymorphique) non trouvee : " + ex);
+      return false;
     }
-    return false;
   }
 
   /**
    * Contrôle si le type du retour est identique à celui attendu. La classe du type de retour peut être à l'origine d'une erreur lors du chargement dans le classLoader
    */
-  private void testerTypeDeRetour(String methodName, Class<?>[] parameterTypes, TypeDesc typeDeRetour, Method method) {
+  private void testerTypeDeRetour(String methodName, Class<?>[] parameterTypes, Class<?> typeDeRetour, Method method) {
     try {
-      if (typeDeRetour.toClass() != method.getReturnType()) {
+      if (typeDeRetour != method.getReturnType()) {
         addErreur("Type de retour [" + method.getReturnType() + "] different [" + typeDeRetour + "] - " + classeEnCours + "#" + methodName + "(" + getStringParameterTypes(parameterTypes) + ")");
       }
     } catch (Throwable ex) {
-      addErreur(
-        "Erreur lors du chargement de la classe du type de retour : " + typeDeRetour.getFullName() + " - " + classeEnCours + "#" + methodName + "(" + getStringParameterTypes(parameterTypes) + ")");
+      addErreur("Erreur lors du chargement de la classe du type de retour : " + typeDeRetour.getName() + " - " + classeEnCours + "#" + methodName + "(" + getStringParameterTypes(parameterTypes) + ")");
     }
   }
 
@@ -214,22 +221,18 @@ public class TestControleByteCode extends ScanneClasspath {
    * Récupère la méthode en appliquant la récursivité (sur les classes parents)
    */
   private static Method getMethod(Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
-    Method method = null;
     try {
-      method = aClass.getMethod(methodName, parameterTypes);
+      return aClass.getMethod(methodName, parameterTypes);
     } catch (NoSuchMethodException ex) {
       Class<?> supClass = aClass.getSuperclass();
-      if (supClass != null) {
-        method = getMethod(supClass, methodName, parameterTypes);
-      }
+      return supClass != null ? getMethod(supClass, methodName, parameterTypes) : null;
     }
-    return method;
   }
 
   /**
    * Sert uniquement pour l'affichage dans le log
    */
-  public static String getStringParameterTypes(Class<?>[] parameterTypes) {
+  private static String getStringParameterTypes(Class<?>[] parameterTypes) {
     StringJoiner retour = new StringJoiner(",", "[", "]");
     for (Class<?> parametre : parameterTypes) {
       retour.add(parametre.toString());
@@ -240,7 +243,7 @@ public class TestControleByteCode extends ScanneClasspath {
   /**
    * Ajout d'une erreur si non exclue
    */
-  protected boolean addErreur(final String erreur) {
+  private boolean addErreur(final String erreur) {
     if (!isExclu(Exclusion.ERREUR, erreur)) {
       jarEnCours.addToClassesEnErreur(classeEnCours).addErreur(erreur);
       LOG.error(erreur);
@@ -267,7 +270,7 @@ public class TestControleByteCode extends ScanneClasspath {
   /**
    * Possibilité de configurer le nombre de jar minimum traité via la variable d'environnement -DnbJarMinimum=2
    */
-  protected void validerNombreJarMinimumTraite() {
+  private void validerNombreJarMinimumTraite() {
     assertThat(jarsTraites.size() > nbJarMinimum).isTrue();
   }
 
@@ -281,7 +284,7 @@ public class TestControleByteCode extends ScanneClasspath {
     return true;
   }
 
-  public Set<Jar> getJarsTraites() {
+  protected Set<Jar> getJarsTraites() {
     return jarsTraites;
   }
 

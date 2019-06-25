@@ -15,8 +15,7 @@ Use case :
 
 ## Running the tool
 
-* Add the maven/gradle dependencies in your project test scope (no maven central for now, compile it by yourself : _mvn clean install_)
-  * _You will need to compile https://github.com/cojen/Cojen in snapshot before_
+* Add the maven/gradle dependencies in your project test scope (no maven central for now, compile it by yourself : _mvn clean install_)  
 
 ```
 <dependency>

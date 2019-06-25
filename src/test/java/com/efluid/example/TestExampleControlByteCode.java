@@ -1,14 +1,16 @@
 package com.efluid.example;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.*;
-import java.util.function.Function;
-
-import com.efluid.tcbc.*;
+import com.efluid.tcbc.object.Classe;
+import com.efluid.tcbc.object.Jar;
+import com.efluid.tcbc.TestControleByteCode;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.implementation.FixedValue;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test an error usage case when a signature is modified by changing the return type from String to void.

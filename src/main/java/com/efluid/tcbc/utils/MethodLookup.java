@@ -1,98 +1,26 @@
 package com.efluid.tcbc.utils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.Set;
+
+import static java.lang.reflect.Modifier.isStatic;
 
 /**
  * Classe utilitaire de recherche récursive de méthodes sur une classe ou une arborescence de classes.
  */
 public final class MethodLookup {
 
-  /**
-   * Classe utilitaire
-   */
-  private MethodLookup() {
-  }
+  private Class<?> aClass;
+  private String methodName;
+  private Class<?>[] parameterTypes;
 
-  /**
-   * Recherche de méthode sur une classe particulière
-   * <p>
-   * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. Les méthodes héritées sont ignorées.
-   * <p>
-   * <b>Attention - Usage à éviter tant que possible : </b> Si plusieurs méthodes de même nom existent, avec divers jeux de paramètres, l'une d'elle est choisie <u>arbitrairement</u>.<br>
-   * Privilégier la recherche d'une signature explicite avec paramètres : {@link #getDeclaredMethod(Class, String, Class...)}
-   *
-   * @param theClass   classe à inspecter
-   * @param methodName nom de la méthode
-   * @return la méthode recherchée, ou bien <code>null</code> si aucune méthode de ce nom n'existe
-   */
-  public static Method getAnyDeclaredMethodByName(Class<?> theClass, String methodName) {
-    for (Method method : theClass.getDeclaredMethods()) {
-      if (method.getName().equals(methodName)) {
-        return method;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Recherche récursive de méthode sur une arborescence complète
-   * <p>
-   * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. La recherche est poursuivie sur les classes parentes, et sur toutes
-   * les interfaces.
-   * <p>
-   * <b>Attention - Usage à éviter tant que possible : </b> Si plusieurs méthodes de même nom existent, avec divers jeux de paramètres, l'une d'elle est choisie <u>arbitrairement</u>.<br>
-   * Privilégier la recherche d'une signature explicite avec paramètres : {@link #findMethodInHierarchy(Class, String, Class...)}
-   *
-   * @param aClass     classe à inspecter
-   * @param methodName nom de la méthode
-   * @return une méthode ayant le nom recherché, ou bien <code>null</code> si aucune méthode de ce nom n'existe
-   */
-  public static Method findAnyMethodByNameInHierarchy(Class<?> aClass, String methodName) {
-    FindMethodByName byName = new FindMethodByName(methodName);
-    browseMethodsInHierarchy(aClass, byName);
-    return byName.get();
-  }
-
-  /**
-   * Recherche récursive des méthodes sur une arborescence complète
-   * <p>
-   * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. La recherche est poursuivie sur les classes parentes, et sur toutes
-   * les interfaces.
-   *
-   * @param aClass     classe à inspecter
-   * @param methodName nom de méthode à rechercher
-   * @return la liste de toutes les méthodes ayant le nom demandé, ou une liste vide si aucne méthode ne correspond
-   */
-  public static List<Method> findMethodsByNameInHierarchy(Class<?> aClass, String methodName) {
-    FindMethodsByName byName = new FindMethodsByName(methodName);
-    browseMethodsInHierarchy(aClass, byName);
-    return byName.get();
-  }
-
-  /**
-   * Parcours récursif de méthodes sur une arborescence complète
-   * <p>
-   * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. La recherche est poursuivie sur les classes parentes, et sur toutes
-   * les interfaces.
-   * <p>
-   * Le parcours s'arrête dès que le prédicat est vrai
-   *
-   * @param aClass classe à inspecter
-   * @param finder call-back appelée à chaque nouvelle méthode rencontrée durant le parcours.
-   */
-  public static void browseMethodsInHierarchy(Class<?> aClass, Predicate<Method> finder) {
-    Class<?> clazz = aClass;
-    while (null != clazz) {
-      for (Method method : clazz.getDeclaredMethods()) {
-        if (finder.test(method)) {
-          return;
-        }
-      }
-      clazz = clazz.getSuperclass();
-    }
-    InterfaceUtils.browseConcreteMethodsOnInterfaces(aClass, finder);
+  public MethodLookup(Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
+    this.aClass = aClass;
+    this.methodName = methodName;
+    this.parameterTypes = parameterTypes;
   }
 
   /**
@@ -101,39 +29,40 @@ public final class MethodLookup {
    * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. La recherche est poursuivie sur les classes parentes, et sur toutes
    * les interfaces.
    *
-   * @param aClass         classe à inspecter
-   * @param methodName     nom de la méthode
-   * @param parameterTypes types des arguments de la méthode
    * @return une méthode ayant le nom recherché, ou bien <code>null</code> si aucune méthode de ce nom n'existe
    */
-  public static Method findMethodInHierarchy(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+  public Method findMethodInHierarchy() {
     Class<?> clazz = aClass;
     while (null != clazz) {
-      Method method = getDeclaredMethod(clazz, methodName, parameterTypes);
+      Method method = getDeclaredMethod(clazz);
       if (null != method) {
         return method;
       }
       clazz = clazz.getSuperclass();
     }
 
-    return InterfaceUtils.findConcreteMethodOnInterfaces(aClass, cls -> getDeclaredMethod(cls, methodName, parameterTypes));
+    return findConcreteMethodOnInterfaces();
   }
 
   /**
-   * Recherche récursive d'une méthode sur une arborescence complète, avec une tolérance sur l'auto-boxing.
+   * Recherche d'une méthode "concrète" sur les interfaces
    * <p>
-   * La méthode pourra avoir n'importe quelle visibilité (private, public, protected, packaged) sur la classe passée en paramètres. La recherche est poursuivie sur les classes parentes, et sur toutes
-   * les interfaces.
+   * On s'arrêtera à la première méthode trouvée respectant les critères :
+   * <ul>
+   * <li>une méthode non-nulle est proposée par <code>methodExtractor</code></li>
+   * <li>cette méthode est concrète (default ou statique)</li>
+   * </ul>
    *
-   * @param aClass         classe à inspecter
-   * @param methodName     nom de la méthode
-   * @param parameterTypes types des arguments de la méthode. Une recherche tolérante sera faite sur les types primitifs (int &lt;-&gt; Integer par exemple)
-   * @return une méthode ayant le nom recherché, ou bien <code>null</code> si aucune méthode de ce nom n'existe
+   * @return la méthode correspondante, ou bien <code>null</code> si elle n'a pas pu être trouvée
    */
-  public static Method findCompatibleMethodInHierarchy(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    FindMethodByNameAndTypesAutoboxing byNameAndTypes = new FindMethodByNameAndTypesAutoboxing(methodName, parameterTypes);
-    browseMethodsInHierarchy(aClass, byNameAndTypes);
-    return byNameAndTypes.get();
+  private Method findConcreteMethodOnInterfaces() {
+    for (Class<?> iface : getInterfaces()) {
+      Method method = getDeclaredMethod(iface);
+      if (null != method && (method.isDefault() || isStatic(method.getModifiers()))) {
+        return method;
+      }
+    }
+    return null;
   }
 
   /**
@@ -141,11 +70,32 @@ public final class MethodLookup {
    *
    * @return la méthode recherchée, ou <code>null</code> (plutôt qu'une exception) si la méthode n'existe pas.
    */
-  public static Method getDeclaredMethod(Class<?> theClass, String methodName, Class<?>... parameterTypes) {
+  private Method getDeclaredMethod(Class<?> theClass) {
     try {
       return theClass.getDeclaredMethod(methodName, parameterTypes);
     } catch (Exception ex) {
       return null;
     }
+  }
+
+  /**
+   * Recherche récursive de toutes les interfaces déclarées sur l'arborescence de classes.
+   * <p>
+   * Toutes les interfaces définies sur la classe et ses classes mères sont listées ici (sans doublons).<br>
+   * <b>Attention : </b>Les interfaces que l'on hérite d'autres interfaces ne seront pas listées ici.
+   *
+   * @return la liste de toutes les interfaces implémentées par une classe et ses classe mères.
+   */
+  private List<Class<?>> getInterfaces() {
+    List<Class<?>> interfaces = new ArrayList<>();
+    Set<Class<?>> alreadySeen = new HashSet<>();
+    for (Class<?> clazz = aClass; null != clazz; clazz = clazz.getSuperclass()) {
+      for (Class<?> iface : clazz.getInterfaces()) {
+        if (alreadySeen.add(iface)) {
+          interfaces.add(iface);
+        }
+      }
+    }
+    return interfaces;
   }
 }

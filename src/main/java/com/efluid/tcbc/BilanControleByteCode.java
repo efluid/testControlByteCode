@@ -2,6 +2,8 @@ package com.efluid.tcbc;
 
 import static java.lang.System.lineSeparator;
 
+import com.efluid.tcbc.object.Classe;
+import com.efluid.tcbc.object.Jar;
 import org.slf4j.*;
 
 public class BilanControleByteCode {

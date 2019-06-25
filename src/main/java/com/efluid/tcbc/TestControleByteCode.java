@@ -1,6 +1,7 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.utils.MethodLookup;
+import com.efluid.tcbc.object.Jar;
+import com.efluid.tcbc.object.MethodeCall;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtPrimitiveType;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static javassist.bytecode.ConstPool.*;
@@ -111,7 +111,8 @@ public class TestControleByteCode extends ScanneClasspath {
     if (!List.of("<init>", "<clinit>").contains(nomMethode)) {
       Class<?> aClass = chargerClasse(nomClasse, nomMethode);
       if (aClass != null) {
-        appelerMethode(aClass, nomMethode, getClassParametresTypes(signature, classPool), toClass(getReturnType(signature, classPool)));
+        MethodeCall methodeCall = new MethodeCall(classeEnCours, aClass, nomMethode, getClassParametresTypes(signature, classPool), toClass(getReturnType(signature, classPool)));
+        new ControlePresenceMethode(this, methodeCall).executer();
       }
     }
   }
@@ -165,85 +166,9 @@ public class TestControleByteCode extends ScanneClasspath {
   }
 
   /**
-   * Test l'appel de la méthode
-   */
-  private void appelerMethode(Class<?> aClass, String methodName, Class<?>[] parameterTypes, Class typeDeRetour) {
-    try {
-      Method method = MethodLookup.findMethodInHierarchy(aClass, methodName, parameterTypes);
-      if (method == null) {
-        method = TestControleByteCode.getMethod(aClass, methodName, parameterTypes);
-      }
-      if (null == method && isPolymorphicSignature(aClass, methodName)) {
-        return;
-      }
-      if (method == null) {
-        addErreur("Methode referencee non trouvee : " + methodName + " - " + classeEnCours + " - parametres : " + getStringParameterTypes(parameterTypes));
-      } else {
-        testerTypeDeRetour(methodName, parameterTypes, typeDeRetour, method);
-      }
-    } catch (NoClassDefFoundError errNoClassDefFound) {
-      addErreur("Classe non trouvee lors de la récuperation de la méthode " + classeEnCours + "#" + methodName + " : " + errNoClassDefFound);
-    } catch (Throwable ex) {
-      addErreur("Erreur d'appel de methode : " + ex);
-    }
-  }
-
-  /**
-   * Test d'accès "polymorphique" : le MethodHandle.invoke ne peut être retrouvé par réflexion.
-   * <p>
-   * On se base sur le marqueur interne du compilo.
-   * MethodHandle.PolymorphicSugnature est une annotation interne à la classe, non publique.
-   */
-  private boolean isPolymorphicSignature(Class<?> aClass, String methodName) {
-    try {
-      Method method = aClass.getMethod(methodName, Object[].class);
-      return method != null && Arrays.stream(method.getAnnotations()).map(Object::toString).anyMatch("@java.lang.invoke.MethodHandle$PolymorphicSignature()"::equals);
-    } catch (Throwable ex) {
-      addErreur("Methode (polymorphique) non trouvee : " + ex);
-      return false;
-    }
-  }
-
-  /**
-   * Contrôle si le type du retour est identique à celui attendu. La classe du type de retour peut être à l'origine d'une erreur lors du chargement dans le classLoader
-   */
-  private void testerTypeDeRetour(String methodName, Class<?>[] parameterTypes, Class<?> typeDeRetour, Method method) {
-    try {
-      if (typeDeRetour != method.getReturnType()) {
-        addErreur("Type de retour [" + method.getReturnType() + "] different [" + typeDeRetour + "] - " + classeEnCours + "#" + methodName + "(" + getStringParameterTypes(parameterTypes) + ")");
-      }
-    } catch (Throwable ex) {
-      addErreur("Erreur lors du chargement de la classe du type de retour : " + typeDeRetour.getName() + " - " + classeEnCours + "#" + methodName + "(" + getStringParameterTypes(parameterTypes) + ")");
-    }
-  }
-
-  /**
-   * Récupère la méthode en appliquant la récursivité (sur les classes parents)
-   */
-  private static Method getMethod(Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
-    try {
-      return aClass.getMethod(methodName, parameterTypes);
-    } catch (NoSuchMethodException ex) {
-      Class<?> supClass = aClass.getSuperclass();
-      return supClass != null ? getMethod(supClass, methodName, parameterTypes) : null;
-    }
-  }
-
-  /**
-   * Sert uniquement pour l'affichage dans le log
-   */
-  private static String getStringParameterTypes(Class<?>[] parameterTypes) {
-    StringJoiner retour = new StringJoiner(",", "[", "]");
-    for (Class<?> parametre : parameterTypes) {
-      retour.add(parametre.toString());
-    }
-    return retour.toString();
-  }
-
-  /**
    * Ajout d'une erreur si non exclue
    */
-  private boolean addErreur(final String erreur) {
+  public boolean addErreur(final String erreur) {
     if (!isExclu(Exclusion.ERREUR, erreur)) {
       jarEnCours.addToClassesEnErreur(classeEnCours).addErreur(erreur);
       LOG.error(erreur);
@@ -277,11 +202,6 @@ public class TestControleByteCode extends ScanneClasspath {
   @Override
   protected String getFichierConfiguration() {
     return FICHIER_CONFIGURATION;
-  }
-
-  @Override
-  protected boolean isAvecFlux() {
-    return true;
   }
 
   protected Set<Jar> getJarsTraites() {

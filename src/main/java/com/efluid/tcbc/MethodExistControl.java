@@ -1,17 +1,17 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.object.MethodeCall;
-import com.efluid.tcbc.utils.MethodLookup;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class ControlePresenceMethode {
+import com.efluid.tcbc.object.MethodeCall;
+import com.efluid.tcbc.utils.MethodLookup;
+
+public class MethodExistControl {
 
   private TestControleByteCode controle;
   private MethodeCall methodeCall;
 
-  public ControlePresenceMethode(TestControleByteCode controle, MethodeCall methodeCall) {
+  public MethodExistControl(TestControleByteCode controle, MethodeCall methodeCall) {
     this.controle = controle;
     this.methodeCall = methodeCall;
   }
@@ -19,7 +19,7 @@ public class ControlePresenceMethode {
   /**
    * Test l'appel de la méthode
    */
-  public void executer() {
+  public void execute() {
     try {
       Method method = new MethodLookup(methodeCall.getClasseReferencee(), methodeCall.getNom(), methodeCall.getTypesEntree()).findMethodInHierarchy();
       if (method == null) {

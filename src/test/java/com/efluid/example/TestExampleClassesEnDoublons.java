@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import com.efluid.tcbc.TestControleClasseEnDoublon;
 
 public class TestExampleClassesEnDoublons extends TestControleClasseEnDoublon {
-  
+
   @Override
   protected void isValid(int erreurs) {
     assertThat(1).isEqualTo(erreurs);

@@ -1,19 +1,16 @@
-package com.efluid.tcbc;
+package com.efluid.tcbc.object;
 
-import java.util.*;
-
-import org.slf4j.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Représente une classe lors de la lecture du byteCode
  */
 public class Classe {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Classe.class);
-
   private Jar jar;
   private String nom;
-  List<String> erreurs = new ArrayList<String>();
+  private List<String> erreurs = new ArrayList<>();
 
   public Classe(Jar jar, String nom) {
     this.jar = jar;

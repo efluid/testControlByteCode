@@ -2,6 +2,7 @@ package com.efluid.tcbc;
 
 import java.util.*;
 
+import com.efluid.tcbc.object.Classe;
 import org.slf4j.*;
 
 /**

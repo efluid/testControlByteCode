@@ -1,4 +1,4 @@
-package com.efluid.tcbc;
+package com.efluid.tcbc.object;
 
 import java.util.*;
 
@@ -7,7 +7,7 @@ import java.util.*;
  */
 public class Jar implements Comparable<Jar> {
 
-  private String nom = "";
+  private String nom;
   private Set<Classe> classesEnErreur = new HashSet<>();
 
   public Jar(String nom) {

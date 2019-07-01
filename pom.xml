@@ -177,6 +177,9 @@
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <homedir>/data/EDT/interneUL/gpg</homedir>
+            </configuration>
           </plugin>
         </plugins>
       </build>

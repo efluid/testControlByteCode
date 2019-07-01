@@ -23,7 +23,7 @@ Use case :
     <artifactId>test-control-byte-code</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <scope>test</scope>
-</dependencies>
+</dependency>
 ```
 
 * Create new Junit test who just extending _TestControleByteCode_ or _TestControleClasseEnDoublon_ (see the examples here https://github.com/efluid/testControlByteCode/tree/master/src/test/java/com/efluid/example)

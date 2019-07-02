@@ -19,9 +19,9 @@ Use case :
 
 ```
 <dependency>
-    <groupId>com.efluid</groupId>
+    <groupId>com.efluid.oss</groupId>
     <artifactId>test-control-byte-code</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
 ```

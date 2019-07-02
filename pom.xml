@@ -178,7 +178,7 @@
               </execution>
             </executions>
             <configuration>
-              <homedir>/data/EDT/interneUL/gpg</homedir>
+              <homedir>/opt/mvnDockerDefault/conf/gpg</homedir>
             </configuration>
           </plugin>
         </plugins>

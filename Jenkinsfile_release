@@ -4,10 +4,10 @@ node('socle-jenkins-maven-docker-14-4G') {
 
   try{
     env.JAVA_HOME = "${variables.jdkPathPrefix}11.0.1"
-    sh "mvn -B release:prepare release:perform -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
-    sh 'git status'
-    sh 'git diff'
-    //sh 'git push origin master'
+    steps.withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentials.gpgMavenCentralPassphrase, passwordVariable: 'gpgPassword', usernameVariable: 'gpgUsername']]) {
+      sh "mvn -B release:prepare release:perform -Dgpg.passphrase=${env.gpgPassword} -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
+    }
+    sh "git push origin ${branch}"
   } catch (Exception e) {
     //TODO send mail
     throw e

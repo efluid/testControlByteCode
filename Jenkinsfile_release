@@ -1,6 +1,11 @@
+import com.efluid.mail.legacy.MailUtils
+
 node('socle-jenkins-maven-docker-14-4G') {
 
+  MailUtils mailUtils = new MailUtils(this)
+
   git branch: branch, credentialsId: credentials.efluidGithubAccount, url: 'https://github.com/efluid/testControlByteCode'
+  String subject = "Release testControlByteCode ${releaseVersion}"
 
   try{
     env.JAVA_HOME = "${variables.jdkPathPrefix}11.0.1"
@@ -12,10 +17,14 @@ node('socle-jenkins-maven-docker-14-4G') {
       sh "mvn -B release:prepare release:perform -DgpgPassphrase=${env.gpgPassword} -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
     }
     withCredentials([usernamePassword(credentialsId: credentials.efluidGithubAccount, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-      sh('git push --all https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/efluid/testControlByteCode.git')
+      sh('git push --all --tags https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/efluid/testControlByteCode.git')
     }
+
+    String mailDetail = "testControlByteCode tool from open source project https://github.com/efluid/testControlByteCode was successfull released in version ${releaseVersion}"
+    mailUtils.mailInfo(subject, mailDetail, destinatairesMail, false)
   } catch (Exception e) {
-    //TODO send mail
+    String mailDetail = "testControlByteCode tool from open source project https://github.com/efluid/testControlByteCode was in error during release ${releaseVersion}"
+    mailUtils.mailError(subject, mailDetail, 'testControlByteCode', releaseVersion, null, destinatairesMail, null)
     throw e
   }
 }

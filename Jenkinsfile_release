@@ -1,0 +1,22 @@
+node('socle-jenkins-maven-docker-14-4G') {
+
+  git branch: branch, credentialsId: credentials.efluidGithubAccount, url: 'https://github.com/efluid/testControlByteCode'
+
+  try{
+    env.JAVA_HOME = "${variables.jdkPathPrefix}11.0.1"
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentials.httpProxyAuthentication, passwordVariable: 'proxyPassword', usernameVariable: 'proxyUsername']]) {
+      env.HTTP_PROXY="http://${env.proxyUsername}:${env.proxyPassword}@${variables.httpProxyHost}:${variables.httpProxyPort}"
+      env.HTTPS_PROXY="http://${env.proxyUsername}:${env.proxyPassword}@${variables.httpProxyHost}:${variables.httpProxyPort}"
+    }
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentials.gpgMavenCentralPassphrase, passwordVariable: 'gpgPassword', usernameVariable: 'gpgUsername']]) {
+      sh "mvn -B release:prepare release:perform -DgpgPassphrase=${env.gpgPassword} -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
+    }
+    withCredentials([usernamePassword(credentialsId: credentials.efluidGithubAccount, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+      sh('git push --all https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/efluid/testControlByteCode.git')
+    }
+  } catch (Exception e) {
+    //TODO send mail
+    throw e
+  }
+}
+return this;

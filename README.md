@@ -15,13 +15,13 @@ Use case :
 
 ## Running the tool
 
-* Add the maven/gradle dependencies in your project test scope (no maven central for now, compile it by yourself : _mvn clean install_)  
+* Add the maven/gradle dependencies in your project test scope  
 
 ```
 <dependency>
-    <groupId>com.efluid</groupId>
+    <groupId>com.efluid.oss</groupId>
     <artifactId>test-control-byte-code</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
 ```

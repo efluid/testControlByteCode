@@ -1,12 +1,14 @@
 package com.efluid.tcbc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.*;
-
-import org.slf4j.*;
-
 import com.efluid.tcbc.object.Jar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Classe de test JUNIT permettant de contrôler le byteCode des classes JAVA du classpath de la JVM en cours. <br>
@@ -35,7 +37,7 @@ public class TestControleByteCode extends ScanneClasspath {
   /**
    * Ajout d'une erreur si non exclue
    */
-  public boolean addErreur(String erreur) {
+  boolean addErreur(String erreur) {
     if (!isExclu(Exclusion.ERREUR, erreur)) {
       jarEnCours.addToClassesEnErreur(classeEnCours).addErreur(erreur);
       LOG.error(erreur);
@@ -75,7 +77,7 @@ public class TestControleByteCode extends ScanneClasspath {
     return jarsTraites;
   }
 
-  public Map<String, String> getClassesReferenceesNonTrouveesOuChargees() {
+  Map<String, String> getClassesReferenceesNonTrouveesOuChargees() {
     return classesReferenceesNonTrouveesOuChargees;
   }
 }

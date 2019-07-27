@@ -1,9 +1,10 @@
 package com.efluid.tcbc;
 
-import java.util.*;
-
 import com.efluid.tcbc.object.Classe;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Contrôle qu'il n'y ait pas de classe en doublon dans le classpath
@@ -51,12 +52,12 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
     super.logBilan();
     LOG.info("|=== Classes en doublon ===|");
     classesEnDoublon.forEach((nom, classes) -> {
-      LOG.info("[" + nom + "]");
-      classes.forEach(classe -> LOG.info("\t" + classe.getNomJar()));
+      LOG.info("[{}]", nom);
+      classes.forEach(classe -> LOG.info("\t{}", classe.getNomJar()));
     });
-    LOG.info("Classes trouvees : " + classesParcourues.size());
-    LOG.info("Classes en doublon : " + classesEnDoublon.size());
-    LOG.info("Classes en doublon exclues : " + exclusions.get(Exclusion.ERREUR).size());
+    LOG.info("Classes trouvees : {}", classesParcourues.size());
+    LOG.info("Classes en doublon : {}", classesEnDoublon.size());
+    LOG.info("Classes en doublon exclues : {}", exclusions.get(Exclusion.ERREUR).size());
     return classesEnDoublon.size();
   }
 }

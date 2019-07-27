@@ -11,7 +11,7 @@ public class MethodExistControl {
   private TestControleByteCode controle;
   private MethodeCall methodeCall;
 
-  public MethodExistControl(TestControleByteCode controle, MethodeCall methodeCall) {
+  MethodExistControl(TestControleByteCode controle, MethodeCall methodeCall) {
     this.controle = controle;
     this.methodeCall = methodeCall;
   }
@@ -19,7 +19,7 @@ public class MethodExistControl {
   /**
    * Test l'appel de la méthode
    */
-  public void execute() {
+  void execute() {
     try {
       Method method = new MethodLookup(methodeCall.getClasseReferencee(), methodeCall.getNom(), methodeCall.getTypesEntree()).findMethodInHierarchy();
       if (method == null) {

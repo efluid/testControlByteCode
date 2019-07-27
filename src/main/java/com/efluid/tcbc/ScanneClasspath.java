@@ -117,6 +117,8 @@ public abstract class ScanneClasspath {
 
   /**
    * Aucune erreur ne doit être remontée
+   *
+   * @param erreurs Nombre d’erreur
    */
   protected void isValid(int erreurs) {
     assertThat(0).isEqualTo(erreurs);
@@ -216,7 +218,7 @@ public abstract class ScanneClasspath {
    */
   private List<Path> getFichiersClass(String repertoireClasses) throws IOException {
     final List<Path> fichiersClass = new ArrayList<>();
-    Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<>() {
+    Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<Path>() {
 
       @Override
       public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
@@ -257,6 +259,9 @@ public abstract class ScanneClasspath {
 
   /**
    * Filtre permettant de ne parcourir que les jars souhaités
+   *
+   * @param pathJar Chemin du jar a tester
+   * @return true si le jar est présent
    */
   protected boolean isJarInclu(String pathJar) {
     return jarsInclus.stream().anyMatch(jar -> pathJar.contains(File.separatorChar + jar));

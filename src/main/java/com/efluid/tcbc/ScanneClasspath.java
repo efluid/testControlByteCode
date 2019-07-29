@@ -33,6 +33,7 @@ public abstract class ScanneClasspath {
   private static final Logger LOG = LoggerFactory.getLogger(ScanneClasspath.class);
 
   private static final String ENV_CLASSEPATH = "classpath";
+  private static final String CLASSES_EXTENSION = ".class";
   private String classpath = System.getProperty(ENV_CLASSEPATH);
 
   public enum Exclusion {
@@ -43,8 +44,8 @@ public abstract class ScanneClasspath {
   /**
    * Curseurs du jar et classe lus en cours
    */
-  protected Classe classeEnCours;
-  protected Jar jarEnCours;
+  Classe classeEnCours;
+  Jar jarEnCours;
 
   /**
    * Filtre indiquant les jars contrôlés
@@ -56,11 +57,11 @@ public abstract class ScanneClasspath {
   /**
    * Utilisés pour effectuer le bilan global
    */
-  protected Set<Jar> jarsTraites = new HashSet<>();
+  Set<Jar> jarsTraites = new HashSet<>();
 
-  protected Map<Exclusion, Set<String>> exclusions = new HashMap<>();
+  Map<Exclusion, Set<String>> exclusions = new HashMap<>();
 
-  public ScanneClasspath() {
+  ScanneClasspath() {
     exclusions.put(ERREUR, new HashSet<>());
     exclusions.put(CLASSE, new HashSet<>());
   }
@@ -132,7 +133,7 @@ public abstract class ScanneClasspath {
     try {
       InputStream is = TestControleByteCode.class.getClassLoader().getResourceAsStream(getFichierConfiguration());
       if (is == null) {
-        LOG.error("Fichier de configuration inexistant : " + getFichierConfiguration());
+        LOG.error("Fichier de configuration inexistant : {}", getFichierConfiguration());
         return;
       }
       Map<String, ArrayList<String>> configuration = new Yaml().load(is);
@@ -142,12 +143,12 @@ public abstract class ScanneClasspath {
         chargerListeConfiguration(configuration, filtreErreursExclues, "filtreErreursExclues");
       }
     } catch (Throwable ex) {
-      LOG.error("Erreur lors de la récupération du fichier de configuration " + getFichierConfiguration());
-      LOG.error("", ex);
+      LOG.error("Erreur lors de la récupération du fichier de configuration {}", getFichierConfiguration());
+      LOG.error("STACKTRACE", ex);
     }
-    LOG.info("Jars inclus : " + jarsInclus);
-    LOG.info("Exclusion des classes a ne pas traiter : " + filtreClassesExclues);
-    LOG.info("Erreurs a ne pas traiter: " + filtreErreursExclues);
+    LOG.info("Jars inclus : {}", jarsInclus);
+    LOG.info("Exclusion des classes a ne pas traiter : {}", filtreClassesExclues);
+    LOG.info("Erreurs a ne pas traiter: {}", filtreErreursExclues);
   }
 
   /**
@@ -197,7 +198,8 @@ public abstract class ScanneClasspath {
     try {
       for (Path classe : getFichiersClass(chemin)) {
         String nomClasseEnCours = classe.toString().substring(chemin.length() + 1);
-        nomClasseEnCours = removeEnd(nomClasseEnCours.replaceAll(File.separator.equals("/") ? File.separator : "\\\\", "."), ".class");
+        nomClasseEnCours = removeEnd(nomClasseEnCours.replaceAll(
+          File.separator.equals("/") ? File.separator : "\\\\", "."));
         classeEnCours = new Classe(jarEnCours, nomClasseEnCours);
         if (isExclu(CLASSE, classeEnCours.getNom())) {
           continue;
@@ -205,7 +207,7 @@ public abstract class ScanneClasspath {
         traitementClasseEnCours();
       }
     } catch (Throwable ex) {
-      LOG.error("", ex);
+      LOG.error("STACKTRACE", ex);
     }
   }
 
@@ -218,7 +220,7 @@ public abstract class ScanneClasspath {
 
       @Override
       public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-        if (file.getFileName().toString().endsWith(".class")) {
+        if (file.getFileName().toString().endsWith(CLASSES_EXTENSION)) {
           fichiersClass.add(file);
         }
         return FileVisitResult.CONTINUE;
@@ -240,8 +242,8 @@ public abstract class ScanneClasspath {
       while (enumeration.hasMoreElements()) {
         jarEntry = enumeration.nextElement();
         // Récupération du nom de chaque fichier
-        if (jarEntry.getName().endsWith(".class")) {
-          classeEnCours = new Classe(jarEnCours, removeEnd(jarEntry.getName().replaceAll("/", "."), ".class"));
+        if (jarEntry.getName().endsWith(CLASSES_EXTENSION)) {
+          classeEnCours = new Classe(jarEnCours, removeEnd(jarEntry.getName().replaceAll("/", ".")));
           if (isExclu(CLASSE, classeEnCours.getNom())) {
             continue;
           }
@@ -249,7 +251,7 @@ public abstract class ScanneClasspath {
         }
       }
     } catch (Throwable ex) {
-      LOG.error("", ex);
+      LOG.error("STACKTRACE", ex);
     }
   }
 
@@ -263,7 +265,7 @@ public abstract class ScanneClasspath {
   /**
    * Indique si l'erreur ou la classe est exclue
    */
-  protected boolean isExclu(Exclusion typeExclusion, final String str) {
+  boolean isExclu(Exclusion typeExclusion, final String str) {
     for (String exclusion : (CLASSE.equals(typeExclusion) ? filtreClassesExclues : filtreErreursExclues)) {
       if (str.toLowerCase().contains(exclusion.toLowerCase())) {
         addToExclusions(typeExclusion, str);
@@ -273,22 +275,22 @@ public abstract class ScanneClasspath {
     return false;
   }
 
-  protected static void doLogList(Collection<String> col, String msgEntete) {
+  static void doLogList(Collection<String> col, String msgEntete) {
     if (col != null && !col.isEmpty()) {
       List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<>(col));
-      LOG.info("|==== " + msgEntete + " ====|");
-      liste.stream().sorted().forEach(s -> LOG.info("\t" + s));
+      LOG.info("|==== {} ====|", msgEntete);
+      liste.stream().sorted().forEach(s -> LOG.info("\t{}", s));
     }
   }
 
-  private static String removeEnd(String str, String remove) {
-    if (isNullOrEmpty(str) || isNullOrEmpty(remove) || !str.endsWith(remove)) {
+  private static String removeEnd(String str) {
+    if (isNullOrEmpty(str) || isNullOrEmpty(CLASSES_EXTENSION) || !str.endsWith(CLASSES_EXTENSION)) {
       return str;
     }
-    return str.substring(0, str.length() - remove.length());
+    return str.substring(0, str.length() - CLASSES_EXTENSION.length());
   }
 
-  public static boolean isNullOrEmpty(String s) {
+  static boolean isNullOrEmpty(String s) {
     return ((s == null) || (s.isEmpty()));
   }
 }

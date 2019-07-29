@@ -16,12 +16,12 @@ public class ReadByteCodeClass {
   private TestControleByteCode control;
   private Classe currentReadingClass;
 
-  public ReadByteCodeClass(TestControleByteCode control, Classe currentReadingClass) {
+  ReadByteCodeClass(TestControleByteCode control, Classe currentReadingClass) {
     this.control = control;
     this.currentReadingClass = currentReadingClass;
   }
 
-  public void execute() {
+  void execute() {
     if (toClass(currentReadingClass.getNom()) != null) {
       try {
         lireByteCodeClasse(ClassPool.getDefault().get(currentReadingClass.getNom()).getClassFile().getConstPool());

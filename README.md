@@ -21,7 +21,7 @@ Use case :
 <dependency>
     <groupId>com.efluid.oss</groupId>
     <artifactId>test-control-byte-code</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <scope>test</scope>
 </dependency>
 ```

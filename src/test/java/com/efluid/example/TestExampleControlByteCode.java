@@ -1,14 +1,15 @@
 package com.efluid.example;
 
+import com.efluid.tcbc.TestControleByteCode;
 import com.efluid.tcbc.object.Classe;
 import com.efluid.tcbc.object.Jar;
-import com.efluid.tcbc.TestControleByteCode;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.implementation.FixedValue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +31,9 @@ public class TestExampleControlByteCode extends TestControleByteCode {
   protected void isValid(int erreurs) {
     int nombreErreurs = getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum();
     assertThat(nombreErreurs).isEqualTo(1);
-    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur).flatMap(jar -> jar.getClassesEnErreur().stream()).findFirst().orElseThrow();
+    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur)
+      .flatMap(jar -> jar.getClassesEnErreur().stream())
+      .findFirst().orElseThrow(NoSuchElementException::new);
     assertThat(classInError.getNom()).contains(NAME_CLASS_CREATED_BY_BYTE_BUDDY);
   }
 

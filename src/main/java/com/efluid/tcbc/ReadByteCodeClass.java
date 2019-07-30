@@ -1,17 +1,41 @@
 package com.efluid.tcbc;
 
+import com.efluid.tcbc.object.Classe;
+import com.efluid.tcbc.object.MethodeCall;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtPrimitiveType;
+import javassist.NotFoundException;
+import javassist.bytecode.ConstPool;
+import javassist.bytecode.Descriptor;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import static javassist.bytecode.ConstPool.*;
 import static javassist.bytecode.Descriptor.getReturnType;
 
-import java.lang.reflect.Array;
-import java.util.*;
-
-import com.efluid.tcbc.object.*;
-import javassist.*;
-import javassist.bytecode.*;
-import jdk.dynalink.linker.support.TypeUtilities;
-
 public class ReadByteCodeClass {
+
+  private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE;
+
+  static {
+    Map<Class<?>, Class<?>> wrapperTypes = new HashMap<>();
+    wrapperTypes.put(Void.class, void.class);
+    wrapperTypes.put(Boolean.class, boolean.class);
+    wrapperTypes.put(Byte.class, byte.class);
+    wrapperTypes.put(Character.class, char.class);
+    wrapperTypes.put(Short.class, short.class);
+    wrapperTypes.put(Integer.class, int.class);
+    wrapperTypes.put(Long.class, long.class);
+    wrapperTypes.put(Float.class, float.class);
+    wrapperTypes.put(Double.class, double.class);
+
+    WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMap(wrapperTypes);
+  }
 
   private TestControleByteCode control;
   private Classe currentReadingClass;
@@ -63,7 +87,7 @@ public class ReadByteCodeClass {
    * Charge la classe référencée et appelle la méthode
    */
   private void analyserMethode(String nomClasse, String nomMethode, String signature) throws NotFoundException {
-    if (!List.of("<init>", "<clinit>").contains(nomMethode)) {
+    if (!Arrays.asList("<init>", "<clinit>").contains(nomMethode)) {
       Class<?> aClass = chargerClasse(nomClasse, nomMethode);
       if (aClass != null) {
         MethodeCall methodeCall = new MethodeCall(currentReadingClass, aClass, nomMethode, getClassParametresTypes(signature), toClass(getReturnType(signature, ClassPool.getDefault())));
@@ -78,7 +102,7 @@ public class ReadByteCodeClass {
 
   private Class<?> toClass(CtClass ctClasse) {
     if (ctClasse.isPrimitive()) {
-      return TypeUtilities.getPrimitiveType(toClass(((CtPrimitiveType) ctClasse).getWrapperName()));
+      return WRAPPER_TO_PRIMITIVE.get(toClass(((CtPrimitiveType) ctClasse).getWrapperName()));
     } else if (ctClasse.isArray()) {
       try {
         return Array.newInstance(toClass(ctClasse.getComponentType()), 0).getClass();

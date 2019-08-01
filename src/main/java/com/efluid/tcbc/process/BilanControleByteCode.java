@@ -1,11 +1,11 @@
-package com.efluid.tcbc;
-
-import com.efluid.tcbc.object.Classe;
-import com.efluid.tcbc.object.Jar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.efluid.tcbc.process;
 
 import static java.lang.System.lineSeparator;
+
+import org.slf4j.*;
+
+import com.efluid.tcbc.TestControleByteCode;
+import com.efluid.tcbc.object.*;
 
 public class BilanControleByteCode {
 
@@ -13,14 +13,14 @@ public class BilanControleByteCode {
 
   private final TestControleByteCode controle;
 
-  BilanControleByteCode(TestControleByteCode controle) {
+  public BilanControleByteCode(TestControleByteCode controle) {
     this.controle = controle;
   }
 
   /**
    * Affiche le bilan du contrôle du byteCode
    */
-  int execute() {
+  public int execute() {
     controle.getJarsTraites().forEach(this::loggerJar);
     loggerSynthese();
     return 0;

@@ -1,24 +1,17 @@
-package com.efluid.tcbc;
-
-import com.efluid.tcbc.object.Classe;
-import com.efluid.tcbc.object.MethodeCall;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtPrimitiveType;
-import javassist.NotFoundException;
-import javassist.bytecode.ConstPool;
-import javassist.bytecode.Descriptor;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+package com.efluid.tcbc.process;
 
 import static javassist.bytecode.ConstPool.*;
 import static javassist.bytecode.Descriptor.getReturnType;
 
-public class ReadByteCodeClass {
+import java.lang.reflect.Array;
+import java.util.*;
+
+import com.efluid.tcbc.TestControleByteCode;
+import com.efluid.tcbc.object.*;
+import javassist.*;
+import javassist.bytecode.*;
+
+public class ReadByteCodeClass<T extends TestControleByteCode> {
 
   private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE;
 
@@ -37,15 +30,15 @@ public class ReadByteCodeClass {
     WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMap(wrapperTypes);
   }
 
-  private TestControleByteCode control;
+  private T control;
   private Classe currentReadingClass;
 
-  ReadByteCodeClass(TestControleByteCode control, Classe currentReadingClass) {
+  public ReadByteCodeClass(T control, Classe currentReadingClass) {
     this.control = control;
     this.currentReadingClass = currentReadingClass;
   }
 
-  void execute() {
+  public void execute() {
     if (toClass(currentReadingClass.getNom()) != null) {
       try {
         lireByteCodeClasse(ClassPool.getDefault().get(currentReadingClass.getNom()).getClassFile().getConstPool());
@@ -59,13 +52,13 @@ public class ReadByteCodeClass {
    * Parcours le byteCode de la classe en cours de lecture
    */
   private void lireByteCodeClasse(ConstPool constantPool) throws NotFoundException {
-    scannerMethodes(constantPool);
+    analyserClasse(constantPool);
   }
 
   /**
    * Parcours les méthodes référencées par la classe en cours
    */
-  private void scannerMethodes(ConstPool constantPool) throws NotFoundException {
+  private void analyserClasse(ConstPool constantPool) throws NotFoundException {
     for (int index = 1; index < constantPool.getSize(); index++) {
       switch (constantPool.getTag(index)) {
         case (CONST_Methodref):
@@ -86,7 +79,7 @@ public class ReadByteCodeClass {
   /**
    * Charge la classe référencée et appelle la méthode
    */
-  private void analyserMethode(String nomClasse, String nomMethode, String signature) throws NotFoundException {
+  protected void analyserMethode(String nomClasse, String nomMethode, String signature) throws NotFoundException {
     if (!Arrays.asList("<init>", "<clinit>").contains(nomMethode)) {
       Class<?> aClass = chargerClasse(nomClasse, nomMethode);
       if (aClass != null) {
@@ -113,7 +106,7 @@ public class ReadByteCodeClass {
     return toClass(ctClasse.getName());
   }
 
-  private Class<?> toClass(String nomClasse) {
+  protected Class<?> toClass(String nomClasse) {
     try {
       return chargerClasse(nomClasse, "");
     } catch (Throwable ex) {
@@ -142,5 +135,9 @@ public class ReadByteCodeClass {
       control.getClassesReferenceesNonTrouveesOuChargees().putIfAbsent(nomClasse, libelle + (" - Classe appelante : " + currentReadingClass));
     }
     return null;
+  }
+
+  protected T getControl() {
+    return control;
   }
 }

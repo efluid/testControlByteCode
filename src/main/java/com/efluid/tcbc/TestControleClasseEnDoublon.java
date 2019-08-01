@@ -1,10 +1,13 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.object.Classe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.efluid.tcbc.process.ScanneClasspath.Exclusion.ERREUR;
 
 import java.util.*;
+
+import org.slf4j.*;
+
+import com.efluid.tcbc.object.Classe;
+import com.efluid.tcbc.process.ScanneClasspath;
 
 /**
  * Contrôle qu'il n'y ait pas de classe en doublon dans le classpath
@@ -37,7 +40,8 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
 
   @Override
   protected void traitementClasseEnCours() {
-    if (isExclu(Exclusion.ERREUR, classeEnCours.getNom())) {
+    Classe classeEnCours = getClasseEnCours();
+    if (isExclu(ERREUR, classeEnCours.getNom())) {
       return;
     }
     Classe classeExistante = classesParcourues.get(classeEnCours.getNom());
@@ -57,7 +61,7 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
     });
     LOG.info("Classes trouvees : {}", classesParcourues.size());
     LOG.info("Classes en doublon : {}", classesEnDoublon.size());
-    LOG.info("Classes en doublon exclues : {}", exclusions.get(Exclusion.ERREUR).size());
+    LOG.info("Classes en doublon exclues : {}", getExclusions().get(ERREUR).size());
     return classesEnDoublon.size();
   }
 }

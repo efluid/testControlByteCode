@@ -1,25 +1,20 @@
-package com.efluid.tcbc;
+package com.efluid.tcbc.process;
 
-import com.efluid.tcbc.object.Classe;
-import com.efluid.tcbc.object.Jar;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import static com.efluid.tcbc.process.ScanneClasspath.Exclusion.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.jar.*;
 
-import static com.efluid.tcbc.ScanneClasspath.Exclusion.CLASSE;
-import static com.efluid.tcbc.ScanneClasspath.Exclusion.ERREUR;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.*;
+import org.slf4j.*;
+import org.yaml.snakeyaml.Yaml;
+
+import com.efluid.tcbc.TestControleByteCode;
+import com.efluid.tcbc.object.*;
 
 /**
  * Canevas permettant de parcourir le classpath classe par classe <br>
@@ -47,6 +42,14 @@ public abstract class ScanneClasspath {
   Classe classeEnCours;
   Jar jarEnCours;
 
+  protected Classe getClasseEnCours() {
+    return classeEnCours;
+  }
+
+  public Jar getJarEnCours() {
+    return jarEnCours;
+  }
+
   /**
    * Filtre indiquant les jars contrôlés
    */
@@ -61,9 +64,17 @@ public abstract class ScanneClasspath {
 
   Map<Exclusion, Set<String>> exclusions = new HashMap<>();
 
-  ScanneClasspath() {
+  protected ScanneClasspath() {
     exclusions.put(ERREUR, new HashSet<>());
     exclusions.put(CLASSE, new HashSet<>());
+  }
+
+  public Map<Exclusion, Set<String>> getExclusions() {
+    return exclusions;
+  }
+
+  public Set<Jar> getJarsTraites() {
+    return jarsTraites;
   }
 
   private void addToExclusions(Exclusion typeExclusion, String exclusion) {
@@ -102,7 +113,7 @@ public abstract class ScanneClasspath {
 
   @Test
   public void execute() {
-    execute(classpath != null ? new String[]{classpath} : null);
+    execute(classpath != null ? new String[] { classpath } : null);
   }
 
   /**
@@ -124,7 +135,7 @@ public abstract class ScanneClasspath {
     assertThat(0).isEqualTo(erreurs);
   }
 
-  private void terminate() {
+  protected void terminate() {
     /* Permet d'effectuer un traitement à la fin du scan */
   }
 
@@ -135,7 +146,7 @@ public abstract class ScanneClasspath {
     try {
       InputStream is = TestControleByteCode.class.getClassLoader().getResourceAsStream(getFichierConfiguration());
       if (is == null) {
-        LOG.error("Fichier de configuration inexistant : {}", getFichierConfiguration());
+        LOG.error("Configuration file not found : {}", getFichierConfiguration());
         return;
       }
       Map<String, ArrayList<String>> configuration = new Yaml().load(is);
@@ -236,7 +247,7 @@ public abstract class ScanneClasspath {
    * Parcours toutes les classes du jar en cours
    */
   private void controlerJar() {
-    LOG.info("Controle JAR : " + jarEnCours);
+    LOG.info("Scans jar : " + jarEnCours);
     try (JarFile jar = new JarFile(jarEnCours.getNom())) {
       Enumeration<JarEntry> enumeration = jar.entries();
       JarEntry jarEntry;
@@ -270,7 +281,7 @@ public abstract class ScanneClasspath {
   /**
    * Indique si l'erreur ou la classe est exclue
    */
-  boolean isExclu(Exclusion typeExclusion, final String str) {
+  public boolean isExclu(Exclusion typeExclusion, final String str) {
     for (String exclusion : (CLASSE.equals(typeExclusion) ? filtreClassesExclues : filtreErreursExclues)) {
       if (str.toLowerCase().contains(exclusion.toLowerCase())) {
         addToExclusions(typeExclusion, str);
@@ -280,7 +291,7 @@ public abstract class ScanneClasspath {
     return false;
   }
 
-  static void doLogList(Collection<String> col, String msgEntete) {
+  public static void doLogList(Collection<String> col, String msgEntete) {
     if (col != null && !col.isEmpty()) {
       List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<>(col));
       LOG.info("|==== {} ====|", msgEntete);

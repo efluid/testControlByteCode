@@ -1,14 +1,12 @@
 package com.efluid.tcbc;
 
-import com.efluid.tcbc.object.Jar;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.*;
+
+import org.slf4j.*;
+
+import com.efluid.tcbc.process.*;
 
 /**
  * Classe de test JUNIT permettant de contrôler le byteCode des classes JAVA du classpath de la JVM en cours. <br>
@@ -31,15 +29,15 @@ public class TestControleByteCode extends ScanneClasspath {
 
   @Override
   protected void traitementClasseEnCours() {
-    new ReadByteCodeClass(this, classeEnCours).execute();
+    new ReadByteCodeClass(this, getClasseEnCours()).execute();
   }
 
   /**
    * Ajout d'une erreur si non exclue
    */
-  boolean addErreur(String erreur) {
+  public boolean addErreur(String erreur) {
     if (!isExclu(Exclusion.ERREUR, erreur)) {
-      jarEnCours.addToClassesEnErreur(classeEnCours).addErreur(erreur);
+      getJarEnCours().addToClassesEnErreur(getClasseEnCours()).addErreur(erreur);
       LOG.error(erreur);
       return true;
     }
@@ -65,7 +63,7 @@ public class TestControleByteCode extends ScanneClasspath {
    * Possibilité de configurer le nombre de jar minimum traité via la variable d'environnement -DnbJarMinimum=2
    */
   private void validerNombreJarMinimumTraite() {
-    assertThat(jarsTraites.size() > nbJarMinimum).isTrue();
+    assertThat(getJarsTraites().size() > nbJarMinimum).isTrue();
   }
 
   @Override
@@ -73,11 +71,7 @@ public class TestControleByteCode extends ScanneClasspath {
     return FICHIER_CONFIGURATION;
   }
 
-  protected Set<Jar> getJarsTraites() {
-    return jarsTraites;
-  }
-
-  Map<String, String> getClassesReferenceesNonTrouveesOuChargees() {
+  public Map<String, String> getClassesReferenceesNonTrouveesOuChargees() {
     return classesReferenceesNonTrouveesOuChargees;
   }
 }

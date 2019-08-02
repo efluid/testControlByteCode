@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.*;
 
 import com.efluid.tcbc.object.Jar;
-import com.efluid.tcbc.process.AnalyseDependence;
+import com.efluid.tcbc.process.DependencyAnalysisBetweenLibraries;
 
 /**
  * <pre>
@@ -37,7 +37,7 @@ public class TestDependenceJar extends TestControleByteCode {
 
   @Override
   protected void traitementClasseEnCours() {
-    new AnalyseDependence(this, getClasseEnCours()).execute();
+    new DependencyAnalysisBetweenLibraries(this, getClasseEnCours()).execute();
   }
 
   public Map<String, AtomicLong> getDependances() {

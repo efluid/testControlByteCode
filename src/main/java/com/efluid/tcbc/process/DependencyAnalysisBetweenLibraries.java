@@ -7,9 +7,9 @@ import com.efluid.tcbc.object.Classe;
 import com.efluid.tcbc.utils.ScanneClasspathUtils;
 import javassist.NotFoundException;
 
-public class AnalyseDependence extends ReadByteCodeClass<TestDependenceJar> {
+public class DependencyAnalysisBetweenLibraries extends ReadByteCodeClass<TestDependenceJar> {
 
-  public AnalyseDependence(TestDependenceJar control, Classe currentReadingClass) {
+  public DependencyAnalysisBetweenLibraries(TestDependenceJar control, Classe currentReadingClass) {
     super(control, currentReadingClass);
   }
 
@@ -22,8 +22,7 @@ public class AnalyseDependence extends ReadByteCodeClass<TestDependenceJar> {
   }
 
   /**
-   * Analyse la dépendance, en récupérant la source de la classe
-   * et en stockant le chemin
+   * Analyse la dépendance, en récupérant la source de la classe et en stockant le chemin.
    */
   private void analyseDependence(Class<?> aClass) {
     if (aClass == null) {

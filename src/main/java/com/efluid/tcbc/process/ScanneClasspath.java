@@ -306,7 +306,7 @@ public abstract class ScanneClasspath {
     return str.substring(0, str.length() - CLASSES_EXTENSION.length());
   }
 
-  static boolean isNullOrEmpty(String s) {
+  public static boolean isNullOrEmpty(String s) {
     return ((s == null) || (s.isEmpty()));
   }
 }

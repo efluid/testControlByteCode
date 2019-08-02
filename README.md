@@ -12,6 +12,8 @@ Use case :
 * Identify duplicate classes in the classpath
 * Check if all methods called in application are present in the dependencies with the right signatures
   * Example : _public void method1(String arg1, String arg2)_ become _public void method1(String... args)_
+* Dependency analysis between libraries
+* Creates a graphviz file (.dot) to display dependencies via a graph
 
 ## Running the tool
 
@@ -26,6 +28,10 @@ Use case :
 </dependency>
 ```
 
-* Create new Junit test who just extending _TestControleByteCode_ or _TestControleClasseEnDoublon_ (see the examples here https://github.com/efluid/testControlByteCode/tree/master/src/test/java/com/efluid/example)
+* Create new Junit test who just extending (see the examples here https://github.com/efluid/testControlByteCode/tree/master/src/test/java/com/efluid/example) 
+  * _TestControleByteCode_ 
+  * _TestControleClasseEnDoublon_
+  * _TestDependenceJar_ 
+  
 * Add yaml configuration in _src/test/resources_ like this examples : https://github.com/efluid/testControlByteCode/tree/master/src/test/resources
 * Run Junit tests

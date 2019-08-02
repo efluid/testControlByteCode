@@ -15,7 +15,8 @@ import com.efluid.tcbc.object.Jar;
  * Generate a file <br>
  * Example of file generated "dependenceJar.dot" :
  *
- * @startuml digraph dependence {
+ * @startuml
+ * digraph dependence {
  * layout=dot;concentrate=true;node [shape=box];edge [color=blue];classes [color=red];
  * "slf4j-api-1.7.25.jar" -> "slf4j-simple-1.7.25.jar" [label="7"];
  * "test-classes" -> "byte-buddy-1.9.13.jar" [label="8"];

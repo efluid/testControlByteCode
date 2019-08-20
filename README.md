@@ -14,6 +14,7 @@ Use case :
   * Example : _public void method1(String arg1, String arg2)_ become _public void method1(String... args)_
 * Dependency analysis between libraries
 * Creates a graphviz file (.dot) to display dependencies via a graph
+* Determines or controls dependencies of a library
 
 ## Running the tool
 
@@ -32,6 +33,7 @@ Use case :
   * _TestControleByteCode_ 
   * _TestControleClasseEnDoublon_
   * _TestDependenceJar_ 
+  * _TestAPIsDependenceJar_
   
 * Add yaml configuration in _src/test/resources_ like this examples : https://github.com/efluid/testControlByteCode/tree/master/src/test/resources
 * Run Junit tests

@@ -1,6 +1,7 @@
 package com.efluid.tcbc.process;
 
 import static com.efluid.tcbc.process.ScanneClasspath.Exclusion.*;
+import static java.io.File.separatorChar;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.*;
@@ -53,9 +54,10 @@ public abstract class ScanneClasspath {
   /**
    * Filtre indiquant les jars contrôlés
    */
-  private List<String> jarsInclus = new ArrayList<>();
-  private List<String> filtreClassesExclues = new ArrayList<>();
-  private List<String> filtreErreursExclues = new ArrayList<>();
+  private Set<String> jarsInclus = new HashSet<>();
+  private Set<String> jarsExcluded = new HashSet<>();
+  private Set<String> filtreClassesExclues = new HashSet<>();
+  private Set<String> filtreErreursExclues = new HashSet<>();
 
   /**
    * Utilisés pour effectuer le bilan global
@@ -152,6 +154,7 @@ public abstract class ScanneClasspath {
       Map<String, ArrayList<String>> configuration = new Yaml().load(is);
       if (configuration != null) {
         chargerListeConfiguration(configuration, jarsInclus, "jarsInclus");
+        chargerListeConfiguration(configuration, jarsExcluded, "jarsExcluded");
         chargerListeConfiguration(configuration, filtreClassesExclues, "filtreClassesExclues");
         chargerListeConfiguration(configuration, filtreErreursExclues, "filtreErreursExclues");
       }
@@ -159,7 +162,12 @@ public abstract class ScanneClasspath {
       LOG.error("Erreur lors de la récupération du fichier de configuration {}", getFichierConfiguration());
       LOG.error("STACKTRACE", ex);
     }
-    LOG.info("Jars inclus : {}", jarsInclus);
+    if (scanByJarExclusion()) {
+      LOG.info("Jars excluded : {}", jarsExcluded);
+    } else {
+      LOG.info("Jars inclus : {}", jarsInclus);
+    }
+
     LOG.info("Exclusion des classes a ne pas traiter : {}", filtreClassesExclues);
     LOG.info("Erreurs a ne pas traiter: {}", filtreErreursExclues);
   }
@@ -275,7 +283,15 @@ public abstract class ScanneClasspath {
    * @return true si le jar est présent
    */
   protected boolean isJarInclu(String pathJar) {
-    return jarsInclus.stream().anyMatch(jar -> pathJar.contains(File.separatorChar + jar));
+    if (scanByJarExclusion()) {
+      return !jarsExcluded.stream().anyMatch(jar -> pathJar.contains(separatorChar + jar));
+    } else {
+      return jarsInclus.stream().anyMatch(jar -> pathJar.contains(separatorChar + jar));
+    }
+  }
+
+  protected boolean scanByJarExclusion() {
+    return false;
   }
 
   /**

@@ -106,7 +106,7 @@ public class TestDependenceJar extends TestControleByteCode {
   }
 
   @Override
-  protected boolean isJarInclu(String pathJar) {
+  protected boolean scanByJarExclusion() {
     return true;
   }
 

@@ -26,6 +26,8 @@ public class TestAPIsDependenceJar extends TestControleByteCode {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestAPIsDependenceJar.class);
 
+  private static final String FICHIER_CONFIGURATION = "apisDependence.yaml";
+
   public static String ENV_JAR = "jar";
   public static String ENV_ERREUR = "erreur";
 
@@ -51,12 +53,21 @@ public class TestAPIsDependenceJar extends TestControleByteCode {
 
   @Override
   protected boolean isJarInclu(String pathJar) {
+    return super.isJarInclu(pathJar) && doNotControlYourself(pathJar);
+  }
+
+  @Override
+  protected boolean scanByJarExclusion() {
+    return true;
+  }
+
+  private boolean doNotControlYourself(String pathJar) {
     return !pathJar.contains(libraryControl);
   }
 
   @Override
   protected String getFichierConfiguration() {
-    return "apisDependence.yaml";
+    return FICHIER_CONFIGURATION;
   }
 
   @Override

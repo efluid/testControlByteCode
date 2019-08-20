@@ -30,11 +30,8 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
     return true;
   }
 
-  /**
-   * Indique de scanner tous les jars sans exclusion
-   */
   @Override
-  protected boolean isJarInclu(String pathJar) {
+  protected boolean scanByJarExclusion() {
     return true;
   }
 

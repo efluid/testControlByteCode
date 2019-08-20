@@ -1,0 +1,11 @@
+jarsExcluded :
+  - idea_rt
+  - junit-rt
+  - junit5-rt
+  - assertj-core
+
+# Liste des classes qui ne seront pas testees
+filtreClassesExclues :
+
+# Liste des erreurs non recuperees
+filtreErreursExclues :

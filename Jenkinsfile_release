@@ -4,7 +4,7 @@ node('socle-jenkins-maven-docker-14-4G') {
 
   MailUtils mailUtils = new MailUtils(this)
 
-  git branch: branch, credentialsId: credentials.efluidGithubAccount, url: 'https://github.com/efluid/testControlByteCode'
+  git branch: branch, credentialsId: credentials.gerritAuthentificationForJenkins, url: 'git@github.com:efluid/testControlByteCode.git'
   String subject = "Release testControlByteCode ${releaseVersion}"
 
   try{
@@ -16,9 +16,9 @@ node('socle-jenkins-maven-docker-14-4G') {
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentials.gpgMavenCentralPassphrase, passwordVariable: 'gpgPassword', usernameVariable: 'gpgUsername']]) {
       sh "mvn -B release:prepare release:perform -DgpgPassphrase=${env.gpgPassword} -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
     }
-    withCredentials([usernamePassword(credentialsId: credentials.efluidGithubAccount, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-      sh('git push --all https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/efluid/testControlByteCode.git')
-    }
+	
+    sh('git push --all')
+	sh('git push --tags')
 
     String mailDetail = "testControlByteCode tool from open source project https://github.com/efluid/testControlByteCode was successfull released in version ${releaseVersion}"
     mailUtils.mailInfo(subject, mailDetail, destinatairesMail, false)

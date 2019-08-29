@@ -75,8 +75,8 @@ public class TestAPIsDependenceJar extends TestControleByteCode {
     super.logBilan();
     doLogList(apis, "Apis used of library : " + libraryControl);
     if (apis.isEmpty()) {
-      LOG.info("Aucun appel au jar {}. Verifier son nom et s'il est bien présent dans le classpath : ", libraryControl);
-      LOG.info(System.getProperty("java.class.path"));
+      LOG.error("Aucun appel au jar {}. Verifier son nom et s'il est bien présent dans le classpath : ", libraryControl);
+      LOG.error(System.getProperty("java.class.path"));
     } else if (erreur) {
       return apis.size();
     }

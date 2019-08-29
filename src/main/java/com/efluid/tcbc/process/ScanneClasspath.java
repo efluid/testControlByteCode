@@ -163,13 +163,13 @@ public abstract class ScanneClasspath {
       LOG.error("STACKTRACE", ex);
     }
     if (scanByJarExclusion()) {
-      LOG.info("Jars excluded : {}", jarsExcluded);
+      LOG.error("Jars excluded : {}", jarsExcluded);
     } else {
-      LOG.info("Jars inclus : {}", jarsInclus);
+      LOG.error("Jars inclus : {}", jarsInclus);
     }
 
-    LOG.info("Exclusion des classes a ne pas traiter : {}", filtreClassesExclues);
-    LOG.info("Erreurs a ne pas traiter: {}", filtreErreursExclues);
+    LOG.error("Exclusion des classes a ne pas traiter : {}", filtreClassesExclues);
+    LOG.error("Erreurs a ne pas traiter: {}", filtreErreursExclues);
   }
 
   /**
@@ -255,7 +255,7 @@ public abstract class ScanneClasspath {
    * Parcours toutes les classes du jar en cours
    */
   private void controlerJar() {
-    LOG.info("Scans jar : " + jarEnCours);
+    LOG.error("Scans jar : " + jarEnCours);
     try (JarFile jar = new JarFile(jarEnCours.getNom())) {
       Enumeration<JarEntry> enumeration = jar.entries();
       JarEntry jarEntry;
@@ -310,8 +310,8 @@ public abstract class ScanneClasspath {
   public static void doLogList(Collection<String> col, String msgEntete) {
     if (col != null && !col.isEmpty()) {
       List<String> liste = (List<String>) ((col instanceof List) ? col : new ArrayList<>(col));
-      LOG.info("|==== {} ====|", msgEntete);
-      liste.stream().sorted().forEach(s -> LOG.info("\t{}", s));
+      LOG.error("|==== {} ====|", msgEntete);
+      liste.stream().sorted().forEach(s -> LOG.error("\t{}", s));
     }
   }
 

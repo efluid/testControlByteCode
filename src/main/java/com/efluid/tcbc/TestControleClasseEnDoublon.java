@@ -51,14 +51,14 @@ public class TestControleClasseEnDoublon extends ScanneClasspath {
   @Override
   protected int logBilan() {
     super.logBilan();
-    LOG.info("|=== Classes en doublon ===|");
+    LOG.error("|=== Classes en doublon ===|");
     classesEnDoublon.forEach((nom, classes) -> {
-      LOG.info("[{}]", nom);
-      classes.forEach(classe -> LOG.info("\t{}", classe.getNomJar()));
+      LOG.error("[{}]", nom);
+      classes.forEach(classe -> LOG.error("\t{}", classe.getNomJar()));
     });
-    LOG.info("Classes trouvees : {}", classesParcourues.size());
-    LOG.info("Classes en doublon : {}", classesEnDoublon.size());
-    LOG.info("Classes en doublon exclues : {}", getExclusions().get(ERREUR).size());
+    LOG.error("Classes trouvees : {}", classesParcourues.size());
+    LOG.error("Classes en doublon : {}", classesEnDoublon.size());
+    LOG.error("Classes en doublon exclues : {}", getExclusions().get(ERREUR).size());
     return classesEnDoublon.size();
   }
 }

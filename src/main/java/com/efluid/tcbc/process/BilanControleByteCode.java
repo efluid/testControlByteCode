@@ -28,20 +28,20 @@ public class BilanControleByteCode {
 
   private void loggerSynthese() {
     TestControleByteCode.doLogList(controle.getClassesReferenceesNonTrouveesOuChargees().values(), "Classes référencées non trouvées :");
-    LOG.info("Classes en erreur lors du chargement : {}", controle.getClassesReferenceesNonTrouveesOuChargees().size());
+    LOG.error("Classes en erreur lors du chargement : {}", controle.getClassesReferenceesNonTrouveesOuChargees().size());
     controle.getClassesReferenceesNonTrouveesOuChargees().values().forEach(classe ->
-      LOG.info("\t{}", classe));
-    LOG.info("Jars en erreur : {}", controle.getJarsTraites().stream().filter(Jar::isErreur).count());
-    LOG.info("=== Synthèse classes en erreur ({}) ===", controle.getJarsTraites().stream().mapToLong(jar -> jar.getClassesEnErreur().size()).sum());
+      LOG.error("\t{}", classe));
+    LOG.error("Jars en erreur : {}", controle.getJarsTraites().stream().filter(Jar::isErreur).count());
+    LOG.error("=== Synthèse classes en erreur ({}) ===", controle.getJarsTraites().stream().mapToLong(jar -> jar.getClassesEnErreur().size()).sum());
     controle.getJarsTraites().stream().filter(Jar::isErreur).forEach(jar ->
-      LOG.info("\t{} : {}", jar.getNom(), jar.getClassesEnErreur().size() + lineSeparator()));
-    LOG.info("Nombre d'erreurs totales : {}", controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum());
+      LOG.error("\t{} : {}", jar.getNom(), jar.getClassesEnErreur().size() + lineSeparator()));
+    LOG.error("Nombre d'erreurs totales : {}", controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum());
   }
 
   private void loggerJar(Jar jar) {
     if (!jar.getClassesEnErreur().isEmpty()) {
-      LOG.info("|=== {} ===|", jar.getNom());
-      LOG.info("\t|=== Classes en erreur ===|");
+      LOG.error("|=== {} ===|", jar.getNom());
+      LOG.error("\t|=== Classes en erreur ===|");
     }
     for (Classe classeEnErreur : jar.getClassesEnErreur()) {
       LOG.error("\t\t{} : {} erreur(s)", classeEnErreur.getNom(), classeEnErreur.getNbErreurs());

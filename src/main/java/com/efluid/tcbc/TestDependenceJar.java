@@ -81,11 +81,11 @@ public class TestDependenceJar extends TestControleByteCode {
   private void logDependances(String nom, Map<String, AtomicLong> dependances, boolean graphViz) {
     TreeMap<String, AtomicLong> mapTrie;
     if (!dependances.isEmpty()) {
-      LOG.info(nom + " :");
+      LOG.error(nom + " :");
       mapTrie = new TreeMap<String, AtomicLong>(new ValueComparator(dependances));
       mapTrie.putAll(dependances);
       for (String cle : mapTrie.keySet()) {
-        LOG.info("\treference {} type class of {}", mapTrie.get(cle), cle);
+        LOG.error("\treference {} type class of {}", mapTrie.get(cle), cle);
         if (graphViz) {
           addToFichierGraphViz(nom, cle, mapTrie.get(cle).toString());
         }
@@ -101,8 +101,8 @@ public class TestDependenceJar extends TestControleByteCode {
   }
 
   private void logJarNonReference() {
-    LOG.info("");
-    getJarsTraites().stream().sorted().filter(jar -> !dependances.containsKey(jar.getNom())).forEach(jar -> LOG.info("jar not referenced : {}", jar.getNom()));
+    LOG.error("");
+    getJarsTraites().stream().sorted().filter(jar -> !dependances.containsKey(jar.getNom())).forEach(jar -> LOG.error("jar not referenced : {}", jar.getNom()));
   }
 
   @Override

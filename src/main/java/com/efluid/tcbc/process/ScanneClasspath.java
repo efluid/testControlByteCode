@@ -237,7 +237,11 @@ public abstract class ScanneClasspath {
    */
   private List<Path> getFichiersClass(String repertoireClasses) throws IOException {
     final List<Path> fichiersClass = new ArrayList<>();
-    Files.walkFileTree(Paths.get(repertoireClasses), new SimpleFileVisitor<Path>() {
+    Path repertoireClassesPath = Paths.get(repertoireClasses);
+    if (Files.notExists(repertoireClassesPath)) {
+      return fichiersClass;
+    }
+    Files.walkFileTree(repertoireClassesPath, new SimpleFileVisitor<Path>() {
 
       @Override
       public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {

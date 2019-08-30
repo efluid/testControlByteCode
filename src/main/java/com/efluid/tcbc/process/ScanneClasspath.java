@@ -10,6 +10,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.jar.*;
 
+import org.assertj.core.util.VisibleForTesting;
 import org.junit.*;
 import org.slf4j.*;
 import org.yaml.snakeyaml.Yaml;
@@ -235,7 +236,8 @@ public abstract class ScanneClasspath {
   /**
    * Retourne une liste de tous les fichiers ".class" du répertoire repertoireClasses
    */
-  private List<Path> getFichiersClass(String repertoireClasses) throws IOException {
+  @VisibleForTesting
+  List<Path> getFichiersClass(String repertoireClasses) throws IOException {
     final List<Path> fichiersClass = new ArrayList<>();
     Path repertoireClassesPath = Paths.get(repertoireClasses);
     if (Files.notExists(repertoireClassesPath)) {

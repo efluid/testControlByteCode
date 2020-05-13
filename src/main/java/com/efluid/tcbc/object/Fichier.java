@@ -1,20 +1,21 @@
 package com.efluid.tcbc.object;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
- * Représente une classe lors de la lecture du byteCode
+ * Représente un fichier lors de la lecture du classpath.
  */
-public class Classe {
+public class Fichier {
 
   private Jar jar;
   private String nom;
+  private String extension;
   private List<String> erreurs = new ArrayList<>();
 
-  public Classe(Jar jar, String nom) {
+  public Fichier(Jar jar, String nom, String extension) {
     this.jar = jar;
     this.nom = nom;
+    this.extension = extension;
   }
 
   public void addErreur(String erreur) {
@@ -23,8 +24,8 @@ public class Classe {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Classe) {
-      return (nom.equals(((Classe) obj).getNom()) && jar.equals(((Classe) obj).getJar()));
+    if (obj instanceof Fichier) {
+      return (nom.equals(((Fichier) obj).getNom()) && jar.equals(((Fichier) obj).getJar()));
     }
     return (this == obj);
   }
@@ -42,6 +43,10 @@ public class Classe {
     return nom;
   }
 
+  public String getNomEtExtension() {
+    return nom + "." + extension;
+  }
+
   public Jar getJar() {
     return jar;
   }
@@ -50,9 +55,17 @@ public class Classe {
     return getJar().getNom();
   }
 
+  public String getExtension() {
+    return extension;
+  }
+
+  public void setExtension(String extension) {
+    this.extension = extension;
+  }
+
   @Override
   public String toString() {
-    return "Classe " + getNom() + " contenue par la jar " + jar.getNom();
+    return "Fichier " + getNom() + "." + getExtension() + " contenue par la jar " + jar.getNom();
   }
 
   public List<String> getErreurs() {

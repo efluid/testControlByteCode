@@ -1,13 +1,13 @@
 package com.efluid.tcbc.process;
 
 import com.efluid.tcbc.TestAPIsDependenceJar;
-import com.efluid.tcbc.object.Classe;
+import com.efluid.tcbc.object.Fichier;
 import com.efluid.tcbc.utils.ScanneClasspathUtils;
 import javassist.NotFoundException;
 
 public class AnalysisUseDependency extends ReadByteCodeClass<TestAPIsDependenceJar> {
 
-  public AnalysisUseDependency(TestAPIsDependenceJar control, Classe currentReadingClass) {
+  public AnalysisUseDependency(TestAPIsDependenceJar control, Fichier currentReadingClass) {
     super(control, currentReadingClass);
   }
 
@@ -23,7 +23,7 @@ public class AnalysisUseDependency extends ReadByteCodeClass<TestAPIsDependenceJ
     }
     String path = ScanneClasspathUtils.getCheminDeLaClasse(aClass);
     if (path != null && path.contains(getControl().getLibraryControl())) {
-      getControl().getApis().add(getControl().getClasseEnCours().getNom() + " use : " +aClass + " " + nomMethode + " " + signature);
+      getControl().getApis().add(getControl().getFichierEnCours().getNom() + " use : " +aClass + " " + nomMethode + " " + signature);
     }
   }
 }

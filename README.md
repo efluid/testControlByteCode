@@ -9,7 +9,7 @@ Tool created after multiple runtime problem.
 Use case : 
 
 * Identify missing libraries on runtime
-* Identify duplicate classes in the classpath
+* Identify duplicate files in the classpath
 * Check if all methods called in application are present in the dependencies with the right signatures
   * Example : _public void method1(String arg1, String arg2)_ become _public void method1(String... args)_
 * Dependency analysis between libraries
@@ -31,7 +31,7 @@ Use case :
 
 * Create new Junit test who just extending (see the examples here https://github.com/efluid/testControlByteCode/tree/master/src/test/java/com/efluid/example) 
   * _TestControleByteCode_ 
-  * _TestControleClasseEnDoublon_
+  * _TestControleFichiersEnDoublon_
   * _TestDependenceJar_ 
   * _TestAPIsDependenceJar_
   

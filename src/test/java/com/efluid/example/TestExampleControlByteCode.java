@@ -1,17 +1,15 @@
 package com.efluid.example;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.*;
+import java.util.NoSuchElementException;
+
 import com.efluid.tcbc.TestControleByteCode;
-import com.efluid.tcbc.object.Classe;
-import com.efluid.tcbc.object.Jar;
+import com.efluid.tcbc.object.*;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.implementation.FixedValue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test an error usage case when a signature is modified by changing the return type from String to void.
@@ -29,9 +27,9 @@ public class TestExampleControlByteCode extends TestControleByteCode {
 
   @Override
   protected void isValid(int erreurs) {
-    int nombreErreurs = getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum();
+    int nombreErreurs = getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Fichier::getNbErreurs).sum();
     assertThat(nombreErreurs).isEqualTo(1);
-    Classe classInError = getJarsTraites().stream().filter(Jar::isErreur)
+    Fichier classInError = getJarsTraites().stream().filter(Jar::isErreur)
       .flatMap(jar -> jar.getClassesEnErreur().stream())
       .findFirst().orElseThrow(NoSuchElementException::new);
     assertThat(classInError.getNom()).contains(NAME_CLASS_CREATED_BY_BYTE_BUDDY);

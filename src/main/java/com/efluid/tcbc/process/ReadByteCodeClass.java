@@ -31,9 +31,9 @@ public class ReadByteCodeClass<T extends TestControleByteCode> {
   }
 
   private T control;
-  private Classe currentReadingClass;
+  private Fichier currentReadingClass;
 
-  public ReadByteCodeClass(T control, Classe currentReadingClass) {
+  public ReadByteCodeClass(T control, Fichier currentReadingClass) {
     this.control = control;
     this.currentReadingClass = currentReadingClass;
   }

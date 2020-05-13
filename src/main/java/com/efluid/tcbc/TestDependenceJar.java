@@ -36,8 +36,8 @@ public class TestDependenceJar extends TestControleByteCode {
   private StringBuffer fichierGraphViz = new StringBuffer("digraph dependence {" + lineSeparator() + "\tlayout=dot;concentrate=true;node [shape=box];edge [color=blue];classes [color=red];" + lineSeparator());
 
   @Override
-  protected void traitementClasseEnCours() {
-    new DependencyAnalysisBetweenLibraries(this, getClasseEnCours()).execute();
+  protected void traitementFichierEnCours() {
+    new DependencyAnalysisBetweenLibraries(this, getFichierEnCours()).execute();
   }
 
   public Map<String, AtomicLong> getDependances() {

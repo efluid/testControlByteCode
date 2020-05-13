@@ -7,13 +7,13 @@ import java.util.StringJoiner;
  */
 public class MethodeCall {
 
-  private Classe classeReferencante;
+  private Fichier classeReferencante;
   private Class<?> classeReferencee;
   private String nom;
   private Class<?>[] typesEntree;
   private Class<?> typeRetour;
 
-  public MethodeCall(Classe classeReferencante, Class<?> classeReferencee, String nom, Class<?>[] typeEntree, Class<?> typeRetour) {
+  public MethodeCall(Fichier classeReferencante, Class<?> classeReferencee, String nom, Class<?>[] typeEntree, Class<?> typeRetour) {
     this.classeReferencante = classeReferencante;
     this.classeReferencee = classeReferencee;
     this.nom = nom;

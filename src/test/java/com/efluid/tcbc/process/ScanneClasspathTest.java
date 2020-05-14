@@ -1,13 +1,13 @@
 package com.efluid.tcbc.process;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.*;
-import org.mockito.Mockito;
 
 public class ScanneClasspathTest {
 
@@ -15,7 +15,7 @@ public class ScanneClasspathTest {
 
   @Before
   public void init() {
-    tested = Mockito.mock(ScanneClasspath.class, Mockito.CALLS_REAL_METHODS);
+    tested = spy(ScanneClasspath.class);
   }
 
   @Test

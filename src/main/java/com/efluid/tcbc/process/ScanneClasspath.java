@@ -338,7 +338,7 @@ public abstract class ScanneClasspath {
   }
 
   private String getExtension(String nomFichier) {
-    return nomFichier.contains(".") ? nomFichier.substring(nomFichier.indexOf(".") + 1) : "";
+    return !isNullOrEmpty(nomFichier) && nomFichier.contains(".") ? nomFichier.substring(nomFichier.indexOf(".") + 1) : "";
   }
 
   public static boolean isNullOrEmpty(String s) {

@@ -35,7 +35,7 @@ public class BilanControleByteCode {
     LOG.error("=== Synthèse classes en erreur ({}) ===", controle.getJarsTraites().stream().mapToLong(jar -> jar.getClassesEnErreur().size()).sum());
     controle.getJarsTraites().stream().filter(Jar::isErreur).forEach(jar ->
       LOG.error("\t{} : {}", jar.getNom(), jar.getClassesEnErreur().size() + lineSeparator()));
-    LOG.error("Nombre d'erreurs totales : {}", controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Classe::getNbErreurs).sum());
+    LOG.error("Nombre d'erreurs totales : {}", controle.getJarsTraites().stream().flatMap(jar -> jar.getClassesEnErreur().stream()).mapToInt(Fichier::getNbErreurs).sum());
   }
 
   private void loggerJar(Jar jar) {
@@ -43,7 +43,7 @@ public class BilanControleByteCode {
       LOG.error("|=== {} ===|", jar.getNom());
       LOG.error("\t|=== Classes en erreur ===|");
     }
-    for (Classe classeEnErreur : jar.getClassesEnErreur()) {
+    for (Fichier classeEnErreur : jar.getClassesEnErreur()) {
       LOG.error("\t\t{} : {} erreur(s)", classeEnErreur.getNom(), classeEnErreur.getNbErreurs());
       classeEnErreur.getErreurs().forEach(erreur ->
         LOG.error("\t\t\t{}", erreur));

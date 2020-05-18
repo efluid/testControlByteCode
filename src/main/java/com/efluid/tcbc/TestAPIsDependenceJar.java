@@ -42,8 +42,8 @@ public class TestAPIsDependenceJar extends TestControleByteCode {
   }
 
   @Override
-  protected void traitementClasseEnCours() {
-    new AnalysisUseDependency(this, getClasseEnCours()).execute();
+  protected void traitementFichierEnCours() {
+    new AnalysisUseDependency(this, getFichierEnCours()).execute();
   }
 
   @Override

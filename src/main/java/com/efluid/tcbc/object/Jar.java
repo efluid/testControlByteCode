@@ -9,18 +9,18 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Jar implements Comparable<Jar> {
 
   private String nom;
-  private Set<Classe> classesEnErreur = new HashSet<>();
+  private Set<Fichier> classesEnErreur = new HashSet<>();
   private Map<String, AtomicLong> dependences = new HashMap<>();
 
   public Jar(String nom) {
     this.nom = nom;
   }
 
-  public Set<Classe> getClassesEnErreur() {
+  public Set<Fichier> getClassesEnErreur() {
     return classesEnErreur;
   }
 
-  public Classe addToClassesEnErreur(Classe classe) {
+  public Fichier addToClassesEnErreur(Fichier classe) {
     classesEnErreur.add(classe);
     return classe;
   }

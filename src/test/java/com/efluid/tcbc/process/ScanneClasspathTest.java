@@ -1,14 +1,13 @@
 package com.efluid.tcbc.process;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.*;
 
 public class ScanneClasspathTest {
 
@@ -16,7 +15,7 @@ public class ScanneClasspathTest {
 
   @Before
   public void init() {
-    tested = Mockito.mock(ScanneClasspath.class, Mockito.CALLS_REAL_METHODS);
+    tested = spy(ScanneClasspath.class);
   }
 
   @Test
@@ -24,10 +23,10 @@ public class ScanneClasspathTest {
     String pathThatExist = "";
     String pathThatDoesNotExist = "Path/that/does/not/exist";
 
-    List<Path> shoudlNotBeEmpty = tested.getFichiersClass(pathThatExist);
+    List<Path> shoudlNotBeEmpty = tested.getFichiers(pathThatExist);
     assertThat(shoudlNotBeEmpty.isEmpty()).isFalse();
 
-    List<Path> shoudlBeEmpty = tested.getFichiersClass(pathThatDoesNotExist);
+    List<Path> shoudlBeEmpty = tested.getFichiers(pathThatDoesNotExist);
     assertThat(shoudlBeEmpty.isEmpty()).isTrue();
   }
 }

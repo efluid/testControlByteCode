@@ -28,8 +28,8 @@ public class TestControleByteCode extends ScanneClasspath {
   private Map<String, String> classesReferenceesNonTrouveesOuChargees = new HashMap<>();
 
   @Override
-  protected void traitementClasseEnCours() {
-    new ReadByteCodeClass(this, getClasseEnCours()).execute();
+  protected void traitementFichierEnCours() {
+    new ReadByteCodeClass(this, getFichierEnCours()).execute();
   }
 
   /**
@@ -37,7 +37,7 @@ public class TestControleByteCode extends ScanneClasspath {
    */
   public boolean addErreur(String erreur) {
     if (!isExclu(Exclusion.ERREUR, erreur)) {
-      getJarEnCours().addToClassesEnErreur(getClasseEnCours()).addErreur(erreur);
+      getJarEnCours().addToClassesEnErreur(getFichierEnCours()).addErreur(erreur);
       LOG.error(erreur);
       return true;
     }

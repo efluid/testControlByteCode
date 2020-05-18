@@ -44,14 +44,14 @@ public class TestControleFichiersEnDoublon extends ScanneClasspath {
   @Override
   protected void traitementFichierEnCours() {
     Fichier fichierEnCours = getFichierEnCours();
-    if (isExclu(ERREUR, fichierEnCours.getNom())) {
+    if (isExclu(ERREUR, fichierEnCours.getNomEtExtension())) {
       return;
     }
-    Fichier fichierExistant = fichiersParcourus.get(fichierEnCours.getNom());
+    Fichier fichierExistant = fichiersParcourus.get(fichierEnCours.getNomEtExtension());
     if (fichierExistant != null) {
       fichiersEnDoublon.computeIfAbsent(fichierEnCours.getNomEtExtension(), cle -> new HashSet<>()).addAll(Arrays.asList(fichierEnCours, fichierExistant));
     }
-    fichiersParcourus.put(fichierEnCours.getNom(), fichierEnCours);
+    fichiersParcourus.put(fichierEnCours.getNomEtExtension(), fichierEnCours);
   }
 
   @Override

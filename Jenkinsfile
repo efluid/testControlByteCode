@@ -1,4 +1,8 @@
-node('socle-jenkins-maven-docker-14-4G') {
+import com.efluid.jenkins.*
+
+JenkinsUtils jenkinsUtils = new JenkinsUtils(this)
+
+def body = {
 
   checkout scm
 
@@ -9,5 +13,17 @@ node('socle-jenkins-maven-docker-14-4G') {
   } catch (Exception e) {
     throw e
   }
+}
+
+if (jenkinsUtils.isCjeProd()) {
+    node('socle-jenkins-maven-docker-14-4G') {
+        body.call()
+    }
+} else {
+    new EfluidPodTemplate(this).addContainer(new Container(this).containerType("maven-14").memory("4G")).execute() {
+        container("maven-14") {
+            body.call()
+        }
+    }
 }
 return this;

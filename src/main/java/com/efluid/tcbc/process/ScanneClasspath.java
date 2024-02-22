@@ -1,25 +1,42 @@
 package com.efluid.tcbc.process;
 
-import static com.efluid.tcbc.process.ScanneClasspath.Exclusion.*;
 import static java.io.File.*;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.efluid.tcbc.process.ScanneClasspath.Exclusion.*;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.jar.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import org.assertj.core.util.VisibleForTesting;
-import org.junit.*;
-import org.slf4j.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.efluid.tcbc.TestControleByteCode;
-import com.efluid.tcbc.object.*;
+import com.efluid.tcbc.object.Fichier;
+import com.efluid.tcbc.object.Jar;
 
 /**
  * Canevas permettant de parcourir le classpath fichier par fichier <br>
@@ -32,11 +49,11 @@ public abstract class ScanneClasspath {
 
   private static final Logger LOG = LoggerFactory.getLogger(ScanneClasspath.class);
   private static final String CLASSES_EXTENSION = "class";
-  private Set<String> EXTENSIONS = new HashSet<>(asList(CLASSES_EXTENSION));
+  private static final Set<String> EXTENSIONS = new HashSet<>(Collections.singletonList(CLASSES_EXTENSION));
 
   private static final String ENV_CLASSEPATH = "classpath";
 
-  private String classpath = System.getProperty(ENV_CLASSEPATH);
+  private final String classpath = System.getProperty(ENV_CLASSEPATH);
 
   public enum Exclusion {
     FICHIER,
@@ -74,7 +91,7 @@ public abstract class ScanneClasspath {
    */
   Set<Jar> jarsTraites = new HashSet<>();
 
-  Map<Exclusion, Set<String>> exclusions = new HashMap<>();
+  Map<Exclusion, Set<String>> exclusions = new EnumMap<>(Exclusion.class);
 
   protected ScanneClasspath() {
     exclusions.put(ERREUR, new HashSet<>());
@@ -105,7 +122,6 @@ public abstract class ScanneClasspath {
 
   /**
    * Affiche l'analyse et les erreurs rencontrées
-   *
    * @return nombre d'erreur
    */
   protected int logBilan() {
@@ -140,7 +156,6 @@ public abstract class ScanneClasspath {
 
   /**
    * Aucune erreur ne doit être remontée
-   *
    * @param erreurs Nombre d’erreur
    */
   protected void isValid(int erreurs) {
@@ -169,9 +184,9 @@ public abstract class ScanneClasspath {
         chargerListeConfiguration(configuration, filtreFichiersExclus, "filtreFichiersExclus");
         chargerListeConfiguration(configuration, filtreErreursExclues, "filtreErreursExclues");
       }
-    } catch (Throwable ex) {
+    } catch (Exception ex) {
       LOG.error("Erreur lors de la récupération du fichier de configuration {}", getFichierConfiguration());
-      LOG.error("STACKTRACE", ex);
+      LOG.error("", ex);
     }
     if (scanByJarExclusion()) {
       LOG.error("Jars excluded : {}", jarsExcluded);
@@ -238,7 +253,7 @@ public abstract class ScanneClasspath {
         traitementFichierEnCours();
       }
     } catch (Throwable ex) {
-      LOG.error("STACKTRACE", ex);
+      LOG.error("", ex);
     }
   }
 
@@ -279,7 +294,7 @@ public abstract class ScanneClasspath {
         jarEntry = enumeration.nextElement();
         // Récupération du nom de chaque fichier
         if (EXTENSIONS.contains(getExtension(jarEntry.getName()))) {
-          fichierEnCours = new Fichier(jarEnCours, removeExtension(jarEntry.getName().replaceAll("/", ".")), getExtension(jarEntry.getName()));
+          fichierEnCours = new Fichier(jarEnCours, removeExtension(jarEntry.getName().replace("/", ".")), getExtension(jarEntry.getName()));
           if (isExclu(FICHIER, fichierEnCours.getNom())) {
             continue;
           }
@@ -287,21 +302,20 @@ public abstract class ScanneClasspath {
         }
       }
     } catch (Throwable ex) {
-      LOG.error("STACKTRACE", ex);
+      LOG.error("", ex);
     }
   }
 
   /**
    * Filtre permettant de ne parcourir que les jars souhaités
-   *
    * @param pathJar Chemin du jar a tester
    * @return true si le jar est présent
    */
   protected boolean isJarInclu(String pathJar) {
     if (scanByJarExclusion()) {
-      return !jarsExcluded.stream().anyMatch(jar -> pathJar.contains(separatorChar + jar));
+      return jarsExcluded.stream().noneMatch(jar -> Pattern.compile(jar).matcher(pathJar).find());
     } else {
-      return jarsInclus.stream().anyMatch(jar -> pathJar.contains(separatorChar + jar));
+      return jarsInclus.stream().anyMatch(jar -> Pattern.compile(jar).matcher(pathJar).find());
     }
   }
 

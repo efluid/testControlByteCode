@@ -57,14 +57,14 @@ public class TestControleFichiersEnDoublon extends ScanneClasspath {
   @Override
   protected int logBilan() {
     super.logBilan();
-    LOG.error("|=== Fichiers en doublon ===|");
+    LOG.debug("|=== Fichiers en doublon ===|");
     fichiersEnDoublon.forEach((nom, fichiers) -> {
-      LOG.error("[{}]", nom);
-      fichiers.forEach(fichier -> LOG.error("\t{}", fichier.getNomJar()));
+      LOG.debug("[{}]", nom);
+      fichiers.forEach(fichier -> LOG.debug("\t{}", fichier.getNomJar()));
     });
-    LOG.error("Fichier trouves : {}", fichiersParcourus.size());
-    LOG.error("Fichiers en doublon : {}", fichiersEnDoublon.size());
-    LOG.error("Fichiers en doublon exclus : {}", getExclusions().get(ERREUR).size());
+    LOG.debug("Fichier trouves : {}", fichiersParcourus.size());
+    LOG.debug("Fichiers en doublon : {}", fichiersEnDoublon.size());
+    LOG.debug("Fichiers en doublon exclus : {}", getExclusions().get(ERREUR).size());
     return fichiersEnDoublon.size();
   }
 }

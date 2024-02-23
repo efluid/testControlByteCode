@@ -3,4 +3,5 @@ filtreErreursExclues :
 - javax.
 - module-info
 
-
+directoryExcluded :
+# nothing

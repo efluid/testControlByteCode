@@ -83,6 +83,7 @@ public abstract class ScanneClasspath {
    */
   private Set<String> jarsInclus = new HashSet<>();
   private Set<String> jarsExcluded = new HashSet<>();
+  private Set<String> directoryExcluded = new HashSet<>();
   private Set<String> filtreFichiersExclus = new HashSet<>();
   private Set<String> filtreErreursExclues = new HashSet<>();
 
@@ -159,7 +160,7 @@ public abstract class ScanneClasspath {
    * @param erreurs Nombre d’erreur
    */
   protected void isValid(int erreurs) {
-    assertThat(0).isEqualTo(erreurs);
+    assertThat(erreurs).isEqualTo(0);
   }
 
   protected void terminate() {
@@ -173,13 +174,14 @@ public abstract class ScanneClasspath {
     try {
       InputStream is = TestControleByteCode.class.getClassLoader().getResourceAsStream(getFichierConfiguration());
       if (is == null) {
-        LOG.error("Configuration file not found : {}", getFichierConfiguration());
+        LOG.debug("Configuration file not found : {}", getFichierConfiguration());
         return;
       }
       Map<String, ArrayList<String>> configuration = new Yaml().load(is);
       if (configuration != null) {
         chargerListeConfiguration(configuration, jarsInclus, "jarsInclus");
         chargerListeConfiguration(configuration, jarsExcluded, "jarsExcluded");
+        chargerListeConfiguration(configuration, directoryExcluded, "directoryExcluded");
         chargerListeConfiguration(configuration, filtreFichiersExclus, "filtreClassesExclues");
         chargerListeConfiguration(configuration, filtreFichiersExclus, "filtreFichiersExclus");
         chargerListeConfiguration(configuration, filtreErreursExclues, "filtreErreursExclues");
@@ -189,13 +191,13 @@ public abstract class ScanneClasspath {
       LOG.error("", ex);
     }
     if (scanByJarExclusion()) {
-      LOG.error("Jars excluded : {}", jarsExcluded);
+      LOG.debug("Jars excluded : {}", jarsExcluded);
     } else {
-      LOG.error("Jars inclus : {}", jarsInclus);
+      LOG.debug("Jars inclus : {}", jarsInclus);
     }
 
-    LOG.error("Exclusion des fichiers a ne pas traiter : {}", filtreFichiersExclus);
-    LOG.error("Erreurs a ne pas traiter: {}", filtreErreursExclues);
+    LOG.debug("Exclusion des fichiers a ne pas traiter : {}", filtreFichiersExclus);
+    LOG.debug("Erreurs a ne pas traiter: {}", filtreErreursExclues);
   }
 
   /**
@@ -222,7 +224,7 @@ public abstract class ScanneClasspath {
       if (path.endsWith(".jar") && isJarInclu(path)) {
         initJarEnCours(path);
         scannerJar();
-      } else if (path.endsWith("classes") && isScanneRepertoireClasses()) {
+      } else if (path.endsWith("classes") && isScanneRepertoireClasses() && directoryExcluded.stream().noneMatch(path::contains)) {
         initJarEnCours(path);
         scannerRepertoireClasses(path);
       }
@@ -285,7 +287,7 @@ public abstract class ScanneClasspath {
    * Parcours toutes les classes du jar en cours
    */
   private void scannerJar() {
-    LOG.error("Scans jar : " + jarEnCours);
+    LOG.debug("Scans jar : " + jarEnCours);
     try (JarFile jar = new JarFile(jarEnCours.getNom())) {
       Enumeration<JarEntry> enumeration = jar.entries();
       JarEntry jarEntry;

@@ -1,6 +1,8 @@
 import com.efluid.mail.legacy.MailUtils
+import com.efluid.jenkins.*
 
-node('socle-jenkins-maven-docker-14-4G') {
+  new EfluidPodTemplate(this).label(env.JOB_BASE_NAME).addContainer(new Container(this).containerType("maven-14").memory('4G')).execute() {
+
 
   MailUtils mailUtils = new MailUtils(this)
 
@@ -14,7 +16,7 @@ node('socle-jenkins-maven-docker-14-4G') {
          sh "mvn -B release:prepare release:perform -DgpgPassphrase=${env.gpgPassword} -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}"
        }
     }
-	
+
     sh('git push --all')
     sh('git push --tags')
 

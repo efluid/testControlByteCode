@@ -85,7 +85,7 @@ public class TestDependenceJar extends TestControleByteCode {
       mapTrie = new TreeMap<String, AtomicLong>(new ValueComparator(dependances));
       mapTrie.putAll(dependances);
       for (String cle : mapTrie.keySet()) {
-        LOG.error("\treference {} type class of {}", mapTrie.get(cle), cle);
+        LOG.debug("\treference {} type class of {}", mapTrie.get(cle), cle);
         if (graphViz) {
           addToFichierGraphViz(nom, cle, mapTrie.get(cle).toString());
         }

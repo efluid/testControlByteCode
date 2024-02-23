@@ -9,4 +9,4 @@ filtreClassesExclues :
 filtreErreursExclues :
 
 directoryExcluded :
-  - test-classes
+  - target/classes

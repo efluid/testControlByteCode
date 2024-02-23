@@ -7,6 +7,7 @@ filtreClassesExclues :
 
 # Liste des erreurs non recuperees
 filtreErreursExclues :
+  - META-INF.maven.commons-cli
 
 directoryExcluded :
   - target/classes

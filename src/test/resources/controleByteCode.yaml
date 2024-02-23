@@ -7,3 +7,6 @@ filtreClassesExclues :
 
 # Liste des erreurs non recuperees
 filtreErreursExclues :
+
+directoryExcluded :
+  - test-classes

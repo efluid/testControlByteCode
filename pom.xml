@@ -201,7 +201,8 @@
               </execution>
             </executions>
             <configuration>
-              <homedir>/tmp</homedir>
+              <homedir>/opt/mvnDockerDefault/conf/gpg</homedir>
+              <ascDirectory>/tmp</ascDirectory>
             </configuration>
           </plugin>
         </plugins>
